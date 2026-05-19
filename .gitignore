@@ -2,3 +2,4 @@
 *moep*.py
 *clean*.py
 __pycache__
+*.pkl
