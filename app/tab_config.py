@@ -11,7 +11,7 @@ from config import (
     EIGENVALUE_FLOOR,
 )
 from core import project_to_psd
-from styles import section_label
+from style import section_label
 
 
 def render_tab_config(simple_mode: bool) -> dict:

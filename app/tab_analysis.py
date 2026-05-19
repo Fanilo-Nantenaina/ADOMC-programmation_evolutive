@@ -12,7 +12,7 @@ from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from config import EPSILON_NUM
 from core import weighted_topsis
 from viz import build_pareto_front_figure, build_allocation_donut
-from styles import section_label
+from style import section_label
 
 
 def render_tab_analysis(config: dict) -> None:
