@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from app.config import (
+from config import (
     DEFAULT_ASSET_NAMES,
     DEFAULT_RETURNS_PCT,
     DEFAULT_VOLATILITIES_PCT,
@@ -10,8 +10,8 @@ from app.config import (
     CORR_EQUITY_DEFAULT,
     EIGENVALUE_FLOOR,
 )
-from app.core import project_to_psd
-from style import section_label
+from core import project_to_psd
+from styles import section_label
 
 
 def render_tab_config(simple_mode: bool) -> dict:

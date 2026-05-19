@@ -1,7 +1,7 @@
 import streamlit as st
 
 from config import APP_TITLE, APP_ICON
-from style import apply_global_styles, render_hero
+from styles import apply_global_styles, render_hero
 from sidebar import render_sidebar
 from tab_config import render_tab_config
 from tab_theory import render_tab_theory

@@ -11,11 +11,10 @@ from pymoo.termination.default import DefaultMultiObjectiveTermination
 from pymoo.util.display.multi import MultiObjectiveOutput
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
-from app.config import EPSILON_NUM, EIGENVALUE_FLOOR
+from config import EPSILON_NUM, EIGENVALUE_FLOOR
 
 
 def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
-
     F = np.column_stack([returns_pct, risks_pct])
     if np.std(F[:, 0]) < EPSILON_NUM and np.std(F[:, 1]) < EPSILON_NUM:
         return 0
@@ -34,7 +33,6 @@ def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
 
 
 def project_to_psd(cov_matrix, floor=EIGENVALUE_FLOOR):
-
     eigvals, eigvecs = np.linalg.eigh(cov_matrix)
     min_eig = float(eigvals.min())
     if min_eig < floor:

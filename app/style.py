@@ -1,9 +1,12 @@
+
+
 import streamlit as st
 
-from app.config import get_palette
+from config import get_palette
 
 
 def apply_global_styles(simple_mode: bool) -> None:
+    """Injecte le CSS global et la typographie selon le mode actif."""
     p = get_palette(simple_mode)
 
     css = f"""
@@ -292,6 +295,8 @@ def apply_global_styles(simple_mode: bool) -> None:
 
 
 def render_hero(simple_mode: bool) -> None:
+    """Affiche le hero header avec badge de mode."""
+    p = get_palette(simple_mode)
 
     if simple_mode:
         title = "Votre Conseiller Financier Intelligent"

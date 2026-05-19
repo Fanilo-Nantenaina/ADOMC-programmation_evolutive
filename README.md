@@ -6,7 +6,7 @@ au sens de Markowitz, intégrant **trois approches évolutionnaires complémenta
 1. **MOEP** (Multi-Objective Evolutionary Programming, Fogel-style) — optimisation
    directe du vecteur de poids, mutation auto-adaptative log-normale.
 2. **NSGA-II** — tri non-dominé + crowding (référence pymoo).
-3. **NEAT-Portfolio** — *fusion conceptuelle avec la philosophie neuroevolution* :
+3. **NEAT-Portfolio** — _fusion conceptuelle avec la philosophie neuroevolution_ :
    on évolue **un réseau de neurones qui calcule l'allocation** à partir de
    l'état du marché. Entraînement multi-scénarios → politique généralisable.
 
@@ -50,12 +50,12 @@ sid_app/
 
 ## Trois paradigmes côte à côte
 
-| Aspect                   | MOEP / NSGA-II                 | NEAT-Portfolio |
-|--------------------------|--------------------------------|-------------------------------------------|
+| Aspect                   | MOEP / NSGA-II                 | NEAT-Portfolio                            |
+| ------------------------ | ------------------------------ | ----------------------------------------- |
 | **Ce qui évolue**        | Vecteur de poids $\mathbf{w}$  | Réseau de neurones $\phi_\theta$          |
 | **Sortie**               | $\mathbf{w}^*$ pour 1 scénario | $\phi^*: (\mu,\Sigma) \mapsto \mathbf{w}$ |
 | **Changement de marché** | Re-lancer l'optimisation       | Forward pass O(1)                         |
-| **Multi-objectif**       | Pareto front complet           | Scalaire (Sharpe + utilité − HHI)         |
+| **Multi-objectif**       | ✅ Pareto front complet        | ❌ Scalaire (Sharpe + utilité − HHI)      |
 | **Arbitrage TOPSIS**     | Sur le front Pareto            | Non applicable                            |
 
 Les deux approches sont **complémentaires** : MOEP/NSGA-II pour la décision
@@ -64,8 +64,8 @@ ponctuelle multicritère, NEAT pour la politique généralisable.
 ## Distinctions algorithmiques MOEP vs NSGA-II
 
 | Aspect                     | MOEP (Fogel-style)                             | NSGA-II                                |
-|----------------------------|------------------------------------------------|----------------------------------------|
-| Croisement                 | Aucun                                          | SBX                                    |
+| -------------------------- | ---------------------------------------------- | -------------------------------------- |
+| Croisement                 | ❌ Aucun                                       | ✅ SBX                                 |
 | Mutation                   | Gaussienne auto-adaptative log-normale         | Polynomiale (PM)                       |
 | Sélection environnementale | Tournoi q-stochastique sur Pareto              | Tri non-dominé + crowding déterministe |
 | σ                          | Vecteur par individu, mute lui-même (Schwefel) | Fixe                                   |

@@ -4,9 +4,9 @@ import streamlit as st
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.optimize import minimize
 
-from app.core import MOEP, PortfolioProblem
-from app.viz import build_animated_figure
-from style import section_label
+from core import MOEP, PortfolioProblem
+from viz import build_animated_figure
+from styles import section_label
 
 
 def render_tab_exec(config: dict, portfolio_data: dict) -> None:

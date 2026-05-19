@@ -9,13 +9,14 @@ from pymoo.indicators.hv import Hypervolume
 from pymoo.indicators.igd import IGD
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
-from app.config import EPSILON_NUM
-from app.core import weighted_topsis
-from app.viz import build_pareto_front_figure, build_allocation_donut
-from style import section_label
+from config import EPSILON_NUM
+from core import weighted_topsis
+from viz import build_pareto_front_figure, build_allocation_donut
+from styles import section_label
 
 
 def render_tab_analysis(config: dict) -> None:
+    """Affiche l'onglet de rapport final."""
     simple_mode = config["simple_mode"]
 
     st.markdown("### 📋 Recommandation finale et synthèse")
