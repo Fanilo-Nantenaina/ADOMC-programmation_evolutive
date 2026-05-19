@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 
 from config import get_palette
@@ -18,11 +16,52 @@ def apply_global_styles(simple_mode: bool) -> None:
     .stDeployButton {{ display: none; }}
 
     /* ===== Typographie globale ===== */
-    html, body, [class*="st-"], .stApp, .stMarkdown, p, span, div, label {{
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+    /* On applique Inter uniquement au texte, PAS aux icônes Material Symbols
+       qui ont besoin de leur police icônique pour s'afficher correctement.
+       Sinon le bouton de collapse de la sidebar affiche littéralement
+       "keyboard_arrow_left" sur 200px et casse tout. */
+    html, body, .stApp, .stMarkdown, p, label,
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stHeader"] *,
+    .stButton button,
+    .stTabs [data-baseweb="tab"] {{
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         letter-spacing: -0.01em;
     }}
-    code, pre, .katex {{ font-family: 'JetBrains Mono', 'SF Mono', monospace !important; }}
+
+    /* Restaurer la police icônique pour TOUTES les icônes Material */
+    [class*="material-symbols"],
+    [class*="MaterialSymbols"],
+    [data-testid*="icon"] span,
+    .material-symbols-outlined,
+    .material-symbols-rounded,
+    .material-symbols-sharp {{
+        font-family: 'Material Symbols Outlined', 'Material Symbols Rounded',
+                     'Material Icons' !important;
+        font-feature-settings: 'liga';
+        -webkit-font-feature-settings: 'liga';
+        letter-spacing: normal !important;
+    }}
+
+    code, pre, .katex {{ font-family: 'JetBrains Mono', 'SF Mono', monospace; }}
+
+    /* ===== Bouton de collapse/expand de la sidebar ===== */
+    /* On force la taille et le comportement pour que l'icône reste lisible */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
+    button[kind="header"] {{
+        width: 32px !important;
+        min-width: 32px !important;
+        max-width: 32px !important;
+        height: 32px !important;
+        overflow: hidden !important;
+    }}
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg,
+    button[kind="header"] svg {{
+        width: 20px !important;
+        height: 20px !important;
+    }}
 
     /* ===== Fond global ===== */
     .stApp {{

@@ -515,7 +515,7 @@ def _render_inference_panel(config, portfolio_data, simple_mode):
                 weights * 100, 2
             ),
         }
-    ).sort_values(by=1, axis=0, ascending=False, ignore_index=False)
+    )
     alloc_df = alloc_df.sort_values(by=alloc_df.columns[1], ascending=False)
     alloc_df_filtered = alloc_df[alloc_df.iloc[:, 1] > 0.1]
     if alloc_df_filtered.empty:
