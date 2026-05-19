@@ -1,2 +1,4 @@
-*_v*.py
+*dashboard*.py
+*moep*.py
 *clean*.py
+__pycache__
