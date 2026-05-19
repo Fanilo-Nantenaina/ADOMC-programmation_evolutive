@@ -1,10 +1,3 @@
-"""
-Onglet 1 — Configuration des actifs et corrélations.
-
-Layout en colonnes pour casser l'empilement vertical.
-Retourne un dict avec ui_mu, ui_vol, assets_list, ui_cov_matrix.
-"""
-
 import numpy as np
 import pandas as pd
 import streamlit as st

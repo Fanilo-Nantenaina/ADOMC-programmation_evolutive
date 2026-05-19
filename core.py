@@ -1,8 +1,3 @@
-"""
-Couche métier : problème d'optimisation, algorithmes évolutionnaires,
-fonctions utilitaires mathématiques. Aucune dépendance Streamlit.
-"""
-
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 
@@ -20,23 +15,7 @@ from config import EPSILON_NUM, EIGENVALUE_FLOOR
 
 
 def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
-    """
-    TOPSIS pondéré bi-objectif.
 
-    Paramètres
-    ----------
-    returns_pct : (n,) rendements en %, À MAXIMISER
-    risks_pct   : (n,) risques en %, À MINIMISER
-    w_return, w_risk : poids du décideur en [0, 1]
-
-    Retourne
-    -------
-    int : index du meilleur compromis selon la proximité relative à l'idéal positif.
-
-    Variante : pondération à l'intérieur de la distance euclidienne (norme L2
-    pondérée), équivalente à la formulation de Hwang & Yoon (1981) après
-    normalisation min-max.
-    """
     F = np.column_stack([returns_pct, risks_pct])
     if np.std(F[:, 0]) < EPSILON_NUM and np.std(F[:, 1]) < EPSILON_NUM:
         return 0
@@ -55,11 +34,7 @@ def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
 
 
 def project_to_psd(cov_matrix, floor=EIGENVALUE_FLOOR):
-    """
-    Projette une matrice symétrique sur le cône PSD par clipping spectral.
 
-    Retourne (matrice_corrigée, min_eigenvalue_avant_correction, correction_appliquée).
-    """
     eigvals, eigvecs = np.linalg.eigh(cov_matrix)
     min_eig = float(eigvals.min())
     if min_eig < floor:
@@ -69,15 +44,6 @@ def project_to_psd(cov_matrix, floor=EIGENVALUE_FLOOR):
 
 
 class PortfolioProblem(Problem):
-    """
-    Problème bi-objectif de Markowitz :
-    - f1 = -E[R_p] (rendement espéré, à maximiser → on minimise son opposé)
-    - f2 =  σ_p    (volatilité, à minimiser)
-
-    Variables X ∈ [0,1]^n normalisées en interne en w = X / sum(X) pour
-    respecter ∑w_i = 1, w_i ≥ 0. Encodage redondant mais permettant l'usage
-    direct des opérateurs évolutionnaires en boîte ∈ [0,1]^n.
-    """
 
     def __init__(self, mu_vec, cov_mat, max_risk=None):
         super().__init__(
@@ -101,17 +67,6 @@ class PortfolioProblem(Problem):
 
 
 class EPTournamentSurvival(Survival):
-    """
-    Survie (μ+λ) par tournoi stochastique à q adversaires.
-
-    Pour chaque individu :
-    - q adversaires aléatoires sont tirés ;
-    - une victoire est comptée si l'individu domine au sens de Pareto, ou si
-      égalité de rang avec meilleure distance de crowding ;
-    - les μ avec le plus de victoires survivent.
-
-    Opération entièrement vectorisée (numpy broadcasting).
-    """
 
     def __init__(self, q_tournament=10):
         super().__init__(filter_infeasible=True)
@@ -150,16 +105,6 @@ class EPTournamentSurvival(Survival):
 
 
 class MOEP(GeneticAlgorithm):
-    """
-    Multi-Objective Evolutionary Programming (Fogel-style authentique).
-
-    Distinctions structurelles vs NSGA-II :
-    - Pas de croisement (n_offsprings = pop_size, chaque parent → 1 enfant)
-    - Mutation gaussienne avec auto-adaptation log-normale de σ (Schwefel)
-    - Sélection (μ+λ) par tournoi stochastique sur dominance de Pareto
-
-    Utilise `self.random_state` (pymoo Generator) pour la pleine reproductibilité.
-    """
 
     def __init__(self, pop_size=80, q_tournament=10, sigma_init=0.15, **kwargs):
         super().__init__(

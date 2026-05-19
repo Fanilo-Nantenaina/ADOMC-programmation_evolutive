@@ -1,11 +1,3 @@
-"""
-Onglet 2 — Explications théoriques.
-
-Le contenu se transfigure complètement entre simple et expert :
-- Simple : analogies visuelles, pas de LaTeX, pas de jargon
-- Expert : formules mathématiques, classes d'algorithmes, contraintes
-"""
-
 import streamlit as st
 
 from styles import section_label

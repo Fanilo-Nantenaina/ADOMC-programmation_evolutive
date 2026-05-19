@@ -1,8 +1,3 @@
-"""
-Configuration centrale : constantes mathématiques, données par défaut,
-et tokens de design (palettes de couleurs séparées par mode).
-"""
-
 APP_TITLE = "SID — Optimisation Évolutive de Portefeuille"
 APP_ICON = "🧬"
 

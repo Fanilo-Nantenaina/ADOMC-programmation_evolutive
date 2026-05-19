@@ -1,20 +1,3 @@
-"""
-SID — Optimisation Évolutive & Arbitrage de Portefeuille
-=========================================================
-
-Système d'Aide à la Décision multi-objectif pour la sélection de portefeuille
-au sens de Markowitz, résolu par deux algorithmes évolutionnaires :
-
-- MOEP : Multi-Objective Evolutionary Programming (Fogel-style, implémentation
-         authentique : mutation gaussienne auto-adaptative log-normale,
-         pas de croisement, sélection (μ+λ) par tournoi q-stochastique).
-- NSGA-II : référence pymoo (croisement SBX + mutation polynomiale + tri
-         non-dominé déterministe).
-
-Arbitrage final par TOPSIS pondéré. Indicateurs de qualité du front :
-Hypervolume + IGD (front de référence approché par l'union non-dominée).
-"""
-
 import io
 import time
 from datetime import datetime
@@ -127,23 +110,7 @@ tab_config, tab_theory, tab_exec, tab_analysis = st.tabs(
 
 
 def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
-    """
-    TOPSIS pondéré bi-objectif.
 
-    Paramètres
-    ----------
-    returns_pct : (n,) rendements en %, À MAXIMISER
-    risks_pct   : (n,) risques en %,  À MINIMISER
-    w_return, w_risk : poids du décideur en [0, 1]
-
-    Retourne
-    -------
-    int : index du meilleur compromis.
-
-    Variante : pondération à l'intérieur de la distance euclidienne (norme L2
-    pondérée), équivalente à la formulation de Hwang & Yoon (1981) après
-    normalisation min-max.
-    """
     F = np.column_stack([returns_pct, risks_pct])
     if np.std(F[:, 0]) < EPSILON_NUM and np.std(F[:, 1]) < EPSILON_NUM:
         return 0
@@ -162,11 +129,7 @@ def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
 
 
 def project_to_psd(cov_matrix, floor=EIGENVALUE_FLOOR):
-    """
-    Projette une matrice symétrique sur le cône PSD par clipping spectral.
 
-    Retourne (matrice_corrigée, min_eigenvalue_avant_correction, correction_appliquée).
-    """
     eigvals, eigvecs = np.linalg.eigh(cov_matrix)
     min_eig = float(eigvals.min())
     if min_eig < floor:
@@ -333,16 +296,6 @@ with tab_theory:
 
 
 class PortfolioProblem(Problem):
-    """
-    Problème bi-objectif de Markowitz :
-    - f1 = -E[R_p] (rendement espéré, à maximiser → on minimise son opposé)
-    - f2 =  σ_p   (volatilité, à minimiser)
-
-    Les variables X ∈ [0,1]^n sont normalisées en interne en w = X / sum(X)
-    pour respecter la contrainte d'investissement total (∑w_i = 1, w_i ≥ 0).
-    Cet encodage présente une redondance (plusieurs X mappent au même w) mais
-    permet l'usage direct des opérateurs évolutionnaires en boîte ∈ [0,1]^n.
-    """
 
     def __init__(self, mu_vec, cov_mat, max_risk=None):
         super().__init__(
@@ -366,18 +319,6 @@ class PortfolioProblem(Problem):
 
 
 class EPTournamentSurvival(Survival):
-    """
-    Survie (μ+λ) par tournoi stochastique à q adversaires.
-
-    Pour chaque individu de la pool combinée :
-    - tirage de q adversaires aléatoires distincts
-    - une victoire est comptée si l'individu domine l'adversaire au sens de
-      Pareto, ou s'ils sont de même rang mais l'individu a une meilleure
-      distance de crowding (départage par diversité)
-    - les μ individus avec le plus de victoires survivent
-
-    Cette opération est entièrement vectorisée (O(n) au lieu de O(n²) Python).
-    """
 
     def __init__(self, q_tournament=10):
         super().__init__(filter_infeasible=True)
@@ -417,17 +358,6 @@ class EPTournamentSurvival(Survival):
 
 
 class MOEP(GeneticAlgorithm):
-    """
-    Multi-Objective Evolutionary Programming.
-
-    Distinctions structurelles vs NSGA-II :
-    - Pas de croisement (n_offsprings = pop_size, chaque parent → 1 enfant)
-    - Mutation gaussienne avec auto-adaptation log-normale de σ (Schwefel)
-    - Sélection (μ+λ) par tournoi stochastique sur dominance de Pareto
-
-    Utilise `self.random_state` (pymoo Generator) pour la pleine
-    reproductibilité avec le `seed` passé à minimize().
-    """
 
     def __init__(self, pop_size=80, q_tournament=10, sigma_init=0.15, **kwargs):
         super().__init__(
@@ -570,14 +500,6 @@ if "final_fig" not in st.session_state:
 def build_animated_figure(
     raw_results, n_gen, ui_mu, ui_vol, w_return, w_risk, max_risk_val, simple_mode, fps
 ):
-    """
-    Construit UNE figure Plotly avec des frames d'animation natives.
-
-    Avantages vs N appels à plotly_chart :
-    - 1 seul rendu côté Python
-    - Animation native côté navigateur (slider, play/pause)
-    - L'utilisateur peut scruber dans le temps après la fin du calcul
-    """
     x_max = max(ui_vol) * 110
     y_max = max(ui_mu) * 110
     frame_duration_ms = max(33, int(1000 / fps))

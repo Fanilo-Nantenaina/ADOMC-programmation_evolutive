@@ -1,19 +1,3 @@
-"""
-SID — Point d'entrée Streamlit.
-
-Orchestration :
-1. Page config
-2. Init session state
-3. Render sidebar (lit le toggle simple/expert)
-4. Apply styles (CSS injecté selon le mode actuel)
-5. Render hero header
-6. Render tabs
-
-Lancement :
-    cd sid_app
-    streamlit run app.py
-"""
-
 import streamlit as st
 
 from config import APP_TITLE, APP_ICON

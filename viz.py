@@ -1,10 +1,3 @@
-"""
-Construction de la figure Plotly animée avec frames natives.
-
-Une seule figure embarque toutes les générations sous forme de frames ; le
-navigateur gère l'animation (lecture / pause / slider scrubbable).
-"""
-
 import numpy as np
 import plotly.graph_objects as go
 
@@ -23,11 +16,6 @@ def build_animated_figure(
     simple_mode: bool,
     fps: int,
 ):
-    """
-    Construit la figure Plotly animée avec slider + boutons play/pause.
-
-    Avantage clé : 1 seul `plotly_chart` côté Streamlit au lieu de N redraws.
-    """
     p = get_palette(simple_mode)
     x_max = max(ui_vol) * 110
     y_max = max(ui_mu) * 110

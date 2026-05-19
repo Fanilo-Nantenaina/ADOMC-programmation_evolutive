@@ -1,10 +1,3 @@
-"""
-Onglet 4 — Rapport final et arbitrage TOPSIS.
-
-Layout en colonnes avec métriques en cartes glassmorphism, front de Pareto
-visualisé, donut d'allocation, et export Excel.
-"""
-
 import io
 from datetime import datetime
 
@@ -23,7 +16,6 @@ from styles import section_label
 
 
 def render_tab_analysis(config: dict) -> None:
-    """Affiche l'onglet de rapport final."""
     simple_mode = config["simple_mode"]
 
     st.markdown("### 📋 Recommandation finale et synthèse")

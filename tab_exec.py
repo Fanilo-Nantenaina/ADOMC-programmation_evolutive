@@ -1,10 +1,3 @@
-"""
-Onglet 3 — Moteur d'optimisation et animation.
-
-Lance les algorithmes, construit la figure animée Plotly, et la persiste
-dans st.session_state pour qu'elle survive aux changements d'onglet.
-"""
-
 import time
 
 import streamlit as st
