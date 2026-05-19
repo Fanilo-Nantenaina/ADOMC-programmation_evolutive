@@ -1,6 +1,6 @@
 import streamlit as st
 
-from config import get_palette
+from app.config import get_palette
 
 
 def apply_global_styles(simple_mode: bool) -> None:

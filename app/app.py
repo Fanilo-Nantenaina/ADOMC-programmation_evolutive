@@ -1,13 +1,13 @@
 import streamlit as st
 
-from config import APP_TITLE, APP_ICON
-from styles import apply_global_styles, render_hero
-from sidebar import render_sidebar
-from tab_config import render_tab_config
-from tab_theory import render_tab_theory
-from tab_exec import render_tab_exec
-from tab_policy import render_tab_policy
-from tab_analysis import render_tab_analysis
+from .config import APP_TITLE, APP_ICON
+from .styles import apply_global_styles, render_hero
+from .sidebar import render_sidebar
+from .tab_config import render_tab_config
+from .tab_theory import render_tab_theory
+from .tab_exec import render_tab_exec
+from .tab_policy import render_tab_policy
+from .tab_analysis import render_tab_analysis
 
 st.set_page_config(
     page_title=APP_TITLE,

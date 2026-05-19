@@ -1,8 +1,8 @@
 import numpy as np
 import plotly.graph_objects as go
 
-from config import get_palette
-from core import weighted_topsis
+from app.config import get_palette
+from app.core import weighted_topsis
 
 
 def build_animated_figure(

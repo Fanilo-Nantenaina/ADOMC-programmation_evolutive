@@ -9,9 +9,9 @@ from pymoo.indicators.hv import Hypervolume
 from pymoo.indicators.igd import IGD
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
-from config import EPSILON_NUM
-from core import weighted_topsis
-from viz import build_pareto_front_figure, build_allocation_donut
+from app.config import EPSILON_NUM
+from app.core import weighted_topsis
+from app.viz import build_pareto_front_figure, build_allocation_donut
 from styles import section_label
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from config import (
+from app.config import (
     DEFAULT_ASSET_NAMES,
     DEFAULT_RETURNS_PCT,
     DEFAULT_VOLATILITIES_PCT,
@@ -10,7 +10,7 @@ from config import (
     CORR_EQUITY_DEFAULT,
     EIGENVALUE_FLOOR,
 )
-from core import project_to_psd
+from app.core import project_to_psd
 from styles import section_label
 
 

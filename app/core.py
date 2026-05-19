@@ -11,7 +11,7 @@ from pymoo.termination.default import DefaultMultiObjectiveTermination
 from pymoo.util.display.multi import MultiObjectiveOutput
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 
-from config import EPSILON_NUM, EIGENVALUE_FLOOR
+from app.config import EPSILON_NUM, EIGENVALUE_FLOOR
 
 
 def weighted_topsis(returns_pct, risks_pct, w_return, w_risk):
