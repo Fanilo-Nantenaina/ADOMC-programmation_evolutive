@@ -3,3 +3,6 @@
 *clean*.py
 __pycache__
 *.pkl
+venv
+.next
+node_modules
