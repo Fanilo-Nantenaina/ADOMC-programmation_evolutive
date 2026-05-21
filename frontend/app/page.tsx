@@ -1,65 +1,82 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { Settings2, BookOpen, Activity, FileText } from "lucide-react";
+
+import { Hero } from "@/components/hero";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { ModeToggle } from "@/components/mode-toggle";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
+import { ConfigSection } from "@/components/sections/config-section";
+import { TheorySection } from "@/components/sections/theory-section";
+import { SimulateSection } from "@/components/sections/simulate-section";
+import { ReportSection } from "@/components/sections/report-section";
+
+import { useAppStore } from "@/lib/store";
+
+export default function HomePage() {
+  const mode = useAppStore((s) => s.mode);
+  const step = useAppStore((s) => s.step);
+  const setStep = useAppStore((s) => s.setStep);
+  const isSimple = mode === "simple";
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="container max-w-7xl py-6 md:py-10 space-y-8">
+      {}
+      <div className="flex items-center justify-end gap-3">
+        <ModeToggle />
+        <ThemeToggle />
+      </div>
+
+      {}
+      <Hero />
+
+      {}
+      <Tabs
+        value={step}
+        onValueChange={(v) => setStep(v as any)}
+        className="w-full"
+      >
+        <TabsList className="w-full flex flex-wrap md:w-auto">
+          <TabsTrigger value="config">
+            <Settings2 className="h-4 w-4 mr-2" />
+            {isSimple ? "1. Mes placements" : "1. Configuration"}
+          </TabsTrigger>
+          <TabsTrigger value="theory">
+            <BookOpen className="h-4 w-4 mr-2" />
+            {isSimple ? "2. Comprendre" : "2. Théorie"}
+          </TabsTrigger>
+          <TabsTrigger value="simulate">
+            <Activity className="h-4 w-4 mr-2" />
+            {isSimple ? "3. Lancer l'IA" : "3. Simulation live"}
+          </TabsTrigger>
+          <TabsTrigger value="report">
+            <FileText className="h-4 w-4 mr-2" />
+            {isSimple ? "4. Recommandation" : "4. Rapport"}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="config">
+          <ConfigSection />
+        </TabsContent>
+
+        <TabsContent value="theory">
+          <TheorySection />
+        </TabsContent>
+
+        <TabsContent value="simulate">
+          <SimulateSection />
+        </TabsContent>
+
+        <TabsContent value="report">
+          <ReportSection />
+        </TabsContent>
+      </Tabs>
+
+      <footer className="pt-8 pb-4 text-center text-xs text-muted-foreground">
+        SID — Optimisation Évolutive Multi-Objectif · Backend FastAPI · Frontend
+        Next.js 14
+      </footer>
+    </main>
   );
 }
