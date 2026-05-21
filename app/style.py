@@ -1,75 +1,107 @@
+
+
 import streamlit as st
 
 from config import get_palette
 
 
-def apply_global_styles(simple_mode: bool) -> None:
-    """Injecte le CSS global et la typographie selon le mode actif."""
-    p = get_palette(simple_mode)
+def apply_global_styles(dark_theme: bool, simple_mode: bool = False) -> None:
+
+    p = get_palette(dark_theme)
 
     css = f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* ===== Masquage du chrome Streamlit ===== */
-    #MainMenu, footer, header {{ visibility: hidden; height: 0; }}
+    #MainMenu, footer {{ visibility: hidden; height: 0; }}
     .stDeployButton {{ display: none; }}
 
-    /* ===== Typographie globale ===== */
-    /* On applique Inter uniquement au texte, PAS aux icônes Material Symbols
-       qui ont besoin de leur police icônique pour s'afficher correctement.
-       Sinon le bouton de collapse de la sidebar affiche littéralement
-       "keyboard_arrow_left" sur 200px et casse tout. */
     html, body, .stApp, .stMarkdown, p, label,
     [data-testid="stMarkdownContainer"],
-    [data-testid="stHeader"] *,
     .stButton button,
     .stTabs [data-baseweb="tab"] {{
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         letter-spacing: -0.01em;
     }}
 
-    /* Restaurer la police icônique pour TOUTES les icônes Material */
     [class*="material-symbols"],
     [class*="MaterialSymbols"],
-    [data-testid*="icon"] span,
     .material-symbols-outlined,
     .material-symbols-rounded,
-    .material-symbols-sharp {{
+    .material-symbols-sharp,
+    span.material-symbols-outlined,
+    span.material-symbols-rounded {{
         font-family: 'Material Symbols Outlined', 'Material Symbols Rounded',
                      'Material Icons' !important;
         font-feature-settings: 'liga';
         -webkit-font-feature-settings: 'liga';
         letter-spacing: normal !important;
+        text-transform: none !important;
+        line-height: 1 !important;
     }}
 
     code, pre, .katex {{ font-family: 'JetBrains Mono', 'SF Mono', monospace; }}
 
-    /* ===== Bouton de collapse/expand de la sidebar ===== */
-    /* On force la taille et le comportement pour que l'icône reste lisible */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapsedControl"],
-    button[kind="header"] {{
-        width: 32px !important;
-        min-width: 32px !important;
-        max-width: 32px !important;
-        height: 32px !important;
-        overflow: hidden !important;
+    [data-testid="stSidebarCollapsedControl"] {{
+        position: fixed !important;
+        top: 0.75rem !important;
+        left: 0.75rem !important;
+        z-index: 999999 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+        background: {p['bg_card']} !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid {p['border_strong']} !important;
+        border-radius: 10px !important;
+        padding: 0.35rem !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }}
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapsedControl"] svg,
-    button[kind="header"] svg {{
+    [data-testid="stSidebarCollapsedControl"] button {{
+        background: transparent !important;
+        border: none !important;
+        color: {p['text_primary']} !important;
+        padding: 0.25rem !important;
+        box-shadow: none !important;
+    }}
+    [data-testid="stSidebarCollapsedControl"] button:hover {{
+        background: {p['bg_card_hover']} !important;
+        transform: none !important;
+    }}
+    [data-testid="stSidebarCollapsedControl"] svg {{
+        fill: {p['text_primary']} !important;
         width: 20px !important;
         height: 20px !important;
     }}
 
-    /* ===== Fond global ===== */
+    .sid-callout {{
+        background: {p['bg_card']};
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid {p['border']};
+        border-left: 3px solid {p['accent']};
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        margin: 0.5rem 0;
+        color: {p['text_primary']};
+        font-size: 0.92rem;
+        line-height: 1.55;
+    }}
+    .sid-callout.accent-quote {{
+        border-left-color: {p['moep']};
+        font-style: italic;
+    }}
+    .sid-callout strong, .sid-callout b {{
+        color: {p['accent']};
+        font-weight: 600;
+    }}
+
     .stApp {{
         background: {p['bg_primary']};
         color: {p['text_primary']};
     }}
 
-    /* Gradient subtil en haut, sans rainbow */
     .stApp::before {{
         content: '';
         position: fixed; top: 0; left: 0; right: 0; height: 60vh;
@@ -82,7 +114,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         max-width: 1400px;
     }}
 
-    /* ===== Titres ===== */
     h1, h2, h3, h4 {{
         color: {p['text_primary']};
         font-weight: 700;
@@ -92,7 +123,6 @@ def apply_global_styles(simple_mode: bool) -> None:
     h2 {{ font-size: 1.5rem; margin-top: 2rem; }}
     h3 {{ font-size: 1.15rem; }}
 
-    /* ===== Sidebar ===== */
     [data-testid="stSidebar"] {{
         background: {p['bg_secondary']};
         border-right: 1px solid {p['border']};
@@ -112,7 +142,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         font-weight: 500;
     }}
 
-    /* ===== Onglets ===== */
     .stTabs [data-baseweb="tab-list"] {{
         gap: 0.25rem;
         background: {p['bg_card']};
@@ -144,7 +173,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         box-shadow: 0 4px 12px {p['accent_glow']};
     }}
 
-    /* ===== Métriques (cartes) ===== */
     [data-testid="stMetric"] {{
         background: {p['bg_card']};
         backdrop-filter: blur(20px) saturate(180%);
@@ -172,7 +200,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         letter-spacing: -0.02em;
     }}
 
-    /* ===== Boutons ===== */
     .stButton > button {{
         background: {p['accent']};
         color: white !important;
@@ -196,7 +223,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         backdrop-filter: blur(10px);
     }}
 
-    /* ===== Inputs / sliders ===== */
     .stSlider [data-baseweb="slider"] {{ margin-top: 0.5rem; }}
     .stTextInput input, .stNumberInput input {{
         background: {p['bg_card']} !important;
@@ -205,7 +231,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         color: {p['text_primary']} !important;
     }}
 
-    /* ===== Conteneurs avec bordure (st.container(border=True)) ===== */
     [data-testid="stVerticalBlockBorderWrapper"] {{
         background: {p['bg_card']};
         backdrop-filter: blur(20px) saturate(180%);
@@ -215,7 +240,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         padding: 1.5rem !important;
     }}
 
-    /* ===== Alertes (st.info / warning / success / error) ===== */
     [data-testid="stAlert"] {{
         background: {p['bg_card']} !important;
         backdrop-filter: blur(20px);
@@ -224,7 +248,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         padding: 1rem 1.25rem !important;
     }}
 
-    /* ===== DataFrame ===== */
     [data-testid="stDataFrame"], [data-testid="stTable"] {{
         background: {p['bg_card']};
         border: 1px solid {p['border']};
@@ -232,28 +255,23 @@ def apply_global_styles(simple_mode: bool) -> None:
         overflow: hidden;
     }}
 
-    /* ===== Expander ===== */
     .stExpander {{
         background: {p['bg_card']};
         border: 1px solid {p['border']};
         border-radius: 12px;
     }}
 
-    /* ===== Caption ===== */
     [data-testid="stCaptionContainer"] {{
         color: {p['text_muted']} !important;
         font-size: 0.8rem;
     }}
 
-    /* ===== Progress bar ===== */
     .stProgress > div > div > div {{
         background: {p['accent']} !important;
     }}
 
-    /* ===== Toggle ===== */
     [data-baseweb="checkbox"] {{ font-size: 0.9rem; }}
 
-    /* ===== Hero ===== */
     .sid-hero {{
         padding: 2rem 0 1.5rem 0;
         margin-bottom: 1.5rem;
@@ -295,7 +313,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         box-shadow: 0 0 12px {p['accent_glow']};
     }}
 
-    /* ===== Section header ===== */
     .sid-section-label {{
         text-transform: uppercase;
         letter-spacing: 0.12em;
@@ -305,7 +322,6 @@ def apply_global_styles(simple_mode: bool) -> None:
         margin-top: 1rem; margin-bottom: 0.5rem;
     }}
 
-    /* ===== Cartes algorithmes ===== */
     .sid-algo-card {{
         background: {p['bg_card']};
         backdrop-filter: blur(20px);
@@ -333,9 +349,9 @@ def apply_global_styles(simple_mode: bool) -> None:
     st.markdown(css, unsafe_allow_html=True)
 
 
-def render_hero(simple_mode: bool) -> None:
-    """Affiche le hero header avec badge de mode."""
-    p = get_palette(simple_mode)
+def render_hero(dark_theme: bool, simple_mode: bool) -> None:
+    """Affiche le hero header. Le contenu dépend de simple_mode, les couleurs de dark_theme."""
+    p = get_palette(dark_theme)
 
     if simple_mode:
         title = "Votre Conseiller Financier Intelligent"
@@ -373,5 +389,15 @@ def section_label(text: str) -> None:
     """Affiche un petit label de section en petites capitales."""
     st.markdown(
         f'<div class="sid-section-label">{text}</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def callout(text: str, variant: str = "default") -> None:
+    css_class = "sid-callout"
+    if variant == "quote":
+        css_class += " accent-quote"
+    st.markdown(
+        f'<div class="{css_class}">{text}</div>',
         unsafe_allow_html=True,
     )

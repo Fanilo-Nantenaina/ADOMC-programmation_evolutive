@@ -1,6 +1,6 @@
 import streamlit as st
 
-from style import section_label
+from style import section_label, callout
 
 
 def render_tab_theory(simple_mode: bool) -> None:
@@ -27,8 +27,9 @@ def _render_simple() -> None:
                 "Mais certaines forment une **courbe parfaite** où il devient impossible "
                 "de gagner plus sans accepter plus de risque."
             )
-            st.success(
-                "C'est cette courbe que notre IA recherche : **les choix où plus rien ne se sacrifie inutilement**."
+            callout(
+                "C'est cette courbe que notre IA recherche : "
+                "<strong>les choix où plus rien ne se sacrifie inutilement</strong>."
             )
 
     with col_b:
@@ -42,9 +43,9 @@ def _render_simple() -> None:
                 "le **paradis financier** (max de gain, zéro risque) et "
                 "l'**enfer financier** (zéro gain, max de risque)."
             )
-            st.info(
-                "Le meilleur point est celui qui est **le plus proche du paradis** "
-                "et **le plus loin de l'enfer**, en tenant compte de vos préférences."
+            callout(
+                "Le meilleur point est celui qui est <strong>le plus proche du paradis</strong> "
+                "et <strong>le plus loin de l'enfer</strong>, en tenant compte de vos préférences."
             )
 
     st.write("")

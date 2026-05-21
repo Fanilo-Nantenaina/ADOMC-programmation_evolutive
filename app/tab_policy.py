@@ -1,3 +1,15 @@
+"""
+Onglet 4 — Politique d'allocation apprise par NeuroEvolution.
+
+Différence philosophique vs MOEP/NSGA-II :
+- MOEP optimise UN vecteur de poids pour UN scénario.
+- NEAT évolue UN RÉSEAU qui CALCULE les poids à partir du contexte de marché.
+
+Une fois entraîné sur des scénarios diversifiés, le réseau peut être interrogé
+en temps réel avec n'importe quel état de marché → adaptation instantanée
+sans re-optimisation.
+"""
+
 import os
 import time
 
@@ -66,9 +78,7 @@ def render_tab_policy(config: dict, portfolio_data: dict) -> None:
             st.error("Échec du chargement (fichier corrompu).")
         else:
             st.session_state.neat_policy = bundle
-            st.success(
-                "✅ Politique chargée. Faites défiler vers le bas pour l'utiliser."
-            )
+            st.toast("✅ Politique chargée — disponible ci-dessous.", icon="📂")
 
     if st.session_state.neat_policy is not None:
         st.markdown("---")
@@ -234,7 +244,8 @@ def _run_training(config, portfolio_data, params, policy_mgr):
         chart_placeholder,
         params["n_gen"],
         history,
-        simple_mode,
+        dark_theme=config["dark_theme"],
+        simple_mode=simple_mode,
     )
     population.add_reporter(reporter)
 
@@ -270,24 +281,47 @@ def _run_training(config, portfolio_data, params, policy_mgr):
     st.session_state.neat_policy = {"genome": best_genome, "metadata": metadata}
     st.session_state.neat_history = history
 
-    msg = (
-        f"🎉 Entraînement terminé en **{elapsed:.1f}s**. "
-        f"Fitness final : **{best_genome.fitness:.3f}**. "
-        f"Politique sauvegardée dans `{os.path.basename(saved_path)}`."
+    st.toast(
+        f"🎉 Entraînement terminé en {elapsed:.1f}s — fitness {best_genome.fitness:.3f}",
+        icon="🧬",
     )
-    st.success(msg)
+    st.caption(
+        f"📌 Politique entraînée à l'instant · "
+        f"fitness = {best_genome.fitness:.3f} · "
+        f"durée = {elapsed:.1f}s · "
+        f"sauvegardée dans `{os.path.basename(saved_path)}`"
+    )
 
 
 class _StreamlitReporter(neat.reporting.BaseReporter):
-    """Reporter NEAT qui actualise l'UI Streamlit à chaque génération."""
+    """
+    Reporter NEAT qui actualise l'UI Streamlit pendant l'entraînement.
 
-    def __init__(self, progress, status, chart, n_gen, history, simple_mode):
+    Throttling : le graphique n'est redessiné que toutes les `chart_update_every`
+    générations pour éviter un flash visuel agressif (« tue l'œil »). La barre
+    de progression et le texte de statut, plus légers, restent updatés à chaque
+    génération.
+    """
+
+    def __init__(
+        self,
+        progress,
+        status,
+        chart,
+        n_gen,
+        history,
+        dark_theme: bool,
+        simple_mode: bool,
+        chart_update_every: int = 3,
+    ):
         self.progress = progress
         self.status = status
         self.chart = chart
         self.n_gen = n_gen
         self.history = history
+        self.dark_theme = dark_theme
         self.simple_mode = simple_mode
+        self.chart_update_every = max(1, int(chart_update_every))
         self.gen = 0
 
     def post_evaluate(self, config, population, species, best_genome):
@@ -314,10 +348,14 @@ class _StreamlitReporter(neat.reporting.BaseReporter):
                 f"Espèces actives : **{len(species.species)}**",
                 unsafe_allow_html=True,
             )
-        self._update_chart()
+
+        is_update_step = self.gen % self.chart_update_every == 0
+        is_final = self.gen >= self.n_gen
+        if is_update_step or is_final:
+            self._update_chart()
 
     def _update_chart(self):
-        p = get_palette(self.simple_mode)
+        p = get_palette(self.dark_theme)
         gens = list(range(1, len(self.history["max"]) + 1))
 
         fig = go.Figure()
@@ -352,6 +390,7 @@ class _StreamlitReporter(neat.reporting.BaseReporter):
                 ),
                 gridcolor=p["grid"],
                 tickfont=dict(color=p["text_secondary"], size=10),
+                range=[0.5, self.n_gen + 0.5],
             ),
             yaxis=dict(
                 title=dict(
@@ -369,14 +408,15 @@ class _StreamlitReporter(neat.reporting.BaseReporter):
                 font=dict(size=10, color=p["text_secondary"]),
                 bgcolor="rgba(0,0,0,0)",
             ),
+            uirevision="neat_training",
         )
         self.chart.plotly_chart(
-            fig, use_container_width=True, key=f"neat_chart_g{self.gen}"
+            fig, use_container_width=True, key="neat_training_chart"
         )
 
 
 def _render_inference_panel(config, portfolio_data, simple_mode):
-    p = get_palette(simple_mode)
+    p = get_palette(config["dark_theme"])
     bundle = st.session_state.neat_policy
     genome = bundle["genome"]
     metadata = bundle["metadata"]
@@ -536,7 +576,9 @@ def _render_inference_panel(config, portfolio_data, simple_mode):
             },
         )
     with col_d:
-        donut = build_allocation_donut(alloc_df_filtered, "Politique NEAT", simple_mode)
+        donut = build_allocation_donut(
+            alloc_df_filtered, "Politique NEAT", config["dark_theme"]
+        )
         st.plotly_chart(donut, use_container_width=True)
 
     if (
@@ -545,11 +587,15 @@ def _render_inference_panel(config, portfolio_data, simple_mode):
     ):
         st.write("")
         with st.expander("📊 Courbe de convergence de l'apprentissage", expanded=False):
-            _draw_final_fitness_curve(st.session_state.neat_history, simple_mode)
+            _draw_final_fitness_curve(
+                st.session_state.neat_history,
+                dark_theme=config["dark_theme"],
+                simple_mode=simple_mode,
+            )
 
 
-def _draw_final_fitness_curve(history, simple_mode):
-    p = get_palette(simple_mode)
+def _draw_final_fitness_curve(history, dark_theme: bool, simple_mode: bool):
+    p = get_palette(dark_theme)
     gens = list(range(1, len(history["max"]) + 1))
     fig = go.Figure()
     fig.add_trace(

@@ -12,7 +12,7 @@ from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from config import EPSILON_NUM
 from core import weighted_topsis
 from viz import build_pareto_front_figure, build_allocation_donut
-from style import section_label
+from style import section_label, callout
 
 
 def render_tab_analysis(config: dict) -> None:
@@ -217,7 +217,9 @@ def _render_algorithm_report(name, res, data_store, config, rf, simple_mode, wri
             )
         with col_donut:
             section_label("Vue d'ensemble")
-            donut = build_allocation_donut(summary_df_filtered, name, simple_mode)
+            donut = build_allocation_donut(
+                summary_df_filtered, name, config["dark_theme"]
+            )
             st.plotly_chart(donut, use_container_width=True)
 
         st.write("")
@@ -229,7 +231,8 @@ def _render_algorithm_report(name, res, data_store, config, rf, simple_mode, wri
             final_risk,
             name,
             config["max_risk_val"],
-            simple_mode,
+            dark_theme=config["dark_theme"],
+            simple_mode=simple_mode,
         )
         st.plotly_chart(fig_front, use_container_width=True)
 
@@ -245,25 +248,27 @@ def _render_algorithm_report(name, res, data_store, config, rf, simple_mode, wri
         max_possible = float(max(data_store["ui_mu"]) * 100)
 
         if simple_mode:
-            st.info(
-                f"🎙️ **L'analyse de votre conseiller :** "
-                f"Votre argent est principalement placé sur **{highest_asset}** "
-                f"(**{highest_val:.2f}%**) car c'est le moteur principal de vos gains. "
-                f"\n\n"
+            callout(
+                f"🎙️ <strong>L'analyse de votre conseiller :</strong> "
+                f"Votre argent est principalement placé sur <strong>{highest_asset}</strong> "
+                f"(<strong>{highest_val:.2f}%</strong>) car c'est le moteur principal de vos gains. "
+                f"<br><br>"
                 f"Le placement le plus rentable de votre liste plafonne à "
-                f"**{max_possible:.2f}%**, donc il est impossible de dépasser ce chiffre. "
+                f"<strong>{max_possible:.2f}%</strong>, donc il est impossible de dépasser ce chiffre. "
                 f"L'IA a volontairement réparti une partie sur d'autres placements "
-                f"pour vous protéger des baisses brutales."
+                f"pour vous protéger des baisses brutales.",
+                variant="quote",
             )
         else:
-            st.info(
-                f"📐 **Analyse :** convergence robuste sur le front de Pareto. "
-                f"La solution TOPSIS se positionne à **R_p = {final_return:.2f}%** "
-                f"pour **σ_p = {final_risk:.2f}%**, dégageant un **Sharpe = {sharpe_ratio:.2f}** "
-                f"(r_f = {rf*100:.1f}%). "
-                f"\n\n"
-                f"**Borne supérieure :** rendement maximum théorique = **{max_possible:.2f}%** "
+            callout(
+                f"📐 <strong>Analyse :</strong> convergence robuste sur le front de Pareto. "
+                f"La solution TOPSIS se positionne à <strong>R<sub>p</sub> = {final_return:.2f}%</strong> "
+                f"pour <strong>σ<sub>p</sub> = {final_risk:.2f}%</strong>, dégageant un <strong>Sharpe = {sharpe_ratio:.2f}</strong> "
+                f"(r<sub>f</sub> = {rf*100:.1f}%). "
+                f"<br><br>"
+                f"<strong>Borne supérieure :</strong> rendement maximum théorique = <strong>{max_possible:.2f}%</strong> "
                 f"(portefeuille saturé à 100% sur l'actif à espérance maximale). "
                 f"L'algorithme dégage un compromis en deçà de cette frontière pour minimiser "
-                f"les facteurs de risque de la matrice de covariance."
+                f"les facteurs de risque de la matrice de covariance.",
+                variant="quote",
             )

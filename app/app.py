@@ -29,9 +29,9 @@ def main() -> None:
     """Boucle principale de l'application."""
     config = render_sidebar()
 
-    apply_global_styles(simple_mode=config["simple_mode"])
+    apply_global_styles(simple_mode=config["simple_mode"], dark_theme=False)
 
-    render_hero(simple_mode=config["simple_mode"])
+    render_hero(simple_mode=config["simple_mode"], dark_theme=False)
 
     tab_labels = (
         [

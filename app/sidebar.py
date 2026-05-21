@@ -1,17 +1,33 @@
+"""
+Rendu de la barre latérale et collecte de tous les paramètres de configuration.
+
+Retourne un dictionnaire unique consommé par les onglets.
+"""
+
 import streamlit as st
 
 
 def render_sidebar() -> dict:
+    """
+    Affiche la sidebar complète et retourne un dict avec toutes les valeurs.
+
+    Le contenu et le langage s'adaptent automatiquement au mode (simple/expert).
+    """
     st.sidebar.markdown(
         '<div style="font-size: 0.7rem; text-transform: uppercase; '
         "letter-spacing: 0.12em; font-weight: 700; opacity: 0.6; "
-        "margin-bottom: 0.5rem;\">Niveau d'expertise</div>",
+        'margin-bottom: 0.5rem;">Interface</div>',
         unsafe_allow_html=True,
     )
     simple_mode = st.sidebar.toggle(
         "🔰 Mode vulgarisation",
         value=False,
-        help="Active une interface simplifiée avec un langage non-technique.",
+        help="Adapte le vocabulaire (langage simple vs technique). N'affecte pas les couleurs.",
+    )
+    dark_theme = st.sidebar.toggle(
+        "🌓 Thème sombre",
+        value=True,
+        help="Bascule entre thème sombre (dark) et thème clair (pastel). Indépendant du mode.",
     )
 
     st.sidebar.markdown("---")
@@ -75,8 +91,9 @@ def render_sidebar() -> dict:
     anim_fps = st.sidebar.slider(
         "Vitesse d'animation (FPS)" if simple_mode else "FPS de l'animation",
         1,
-        30,
-        12,
+        15,
+        3,
+        help="Plus bas = animation plus lente et plus lisible. 3 FPS = 333 ms par génération.",
     )
 
     st.sidebar.markdown("---")
@@ -136,6 +153,7 @@ def render_sidebar() -> dict:
 
     return {
         "simple_mode": simple_mode,
+        "dark_theme": dark_theme,
         "algo_choice": algo_choice,
         "pop_size": pop_size,
         "n_gen": n_gen,
