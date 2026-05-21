@@ -1,11 +1,9 @@
 "use client";
 
-import { Settings2, BookOpen, Activity, FileText } from "lucide-react";
-
 import { Hero } from "@/components/hero";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { ModeToggle } from "@/components/mode-toggle";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { SidebarNav, StepperMobile } from "@/components/sidebar-nav";
 
 import { ConfigSection } from "@/components/sections/config-section";
 import { TheorySection } from "@/components/sections/theory-section";
@@ -14,67 +12,50 @@ import { ReportSection } from "@/components/sections/report-section";
 
 import { useAppStore } from "@/lib/store";
 import type { Step } from "@/lib/types";
+import { JSX } from "react";
+
+const SECTIONS: Record<Step, () => JSX.Element> = {
+  config: ConfigSection,
+  theory: TheorySection,
+  simulate: SimulateSection,
+  report: ReportSection,
+};
 
 export default function HomePage() {
-  const mode = useAppStore((s) => s.mode);
   const step = useAppStore((s) => s.step);
-  const setStep = useAppStore((s) => s.setStep);
-  const isSimple = mode === "simple";
+  const ActiveSection = SECTIONS[step];
 
   return (
-    <main className="container max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-8">
-      <div className="flex items-center justify-end gap-3">
-        <ModeToggle />
-        <ThemeToggle />
-      </div>
+    <div className="min-h-screen">
+      <main className="mx-auto max-w-7xl px-4 py-6 md:py-10 space-y-6">
+        {}
+        <div className="flex items-center justify-between gap-3">
+          <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
+            SID · ADOMC
+          </div>
+          <div className="flex items-center gap-3">
+            <ModeToggle />
+            <ThemeToggle />
+          </div>
+        </div>
 
-      <Hero />
+        <Hero />
 
-      <Tabs
-        value={step}
-        onValueChange={(v: string) => setStep(v as Step)}
-        className="w-full"
-      >
-        <TabsList className="w-full flex flex-wrap md:w-auto">
-          <TabsTrigger value="config">
-            <Settings2 className="h-4 w-4 mr-2" />
-            {isSimple ? "1. Mes placements" : "1. Configuration"}
-          </TabsTrigger>
-          <TabsTrigger value="theory">
-            <BookOpen className="h-4 w-4 mr-2" />
-            {isSimple ? "2. Comprendre" : "2. Théorie"}
-          </TabsTrigger>
-          <TabsTrigger value="simulate">
-            <Activity className="h-4 w-4 mr-2" />
-            {isSimple ? "3. Lancer l'IA" : "3. Simulation live"}
-          </TabsTrigger>
-          <TabsTrigger value="report">
-            <FileText className="h-4 w-4 mr-2" />
-            {isSimple ? "4. Recommandation" : "4. Rapport"}
-          </TabsTrigger>
-        </TabsList>
+        {}
+        <StepperMobile />
 
-        <TabsContent value="config">
-          <ConfigSection />
-        </TabsContent>
+        {}
+        <div className="flex gap-6">
+          <SidebarNav />
+          <div className="flex-1 min-w-0">
+            <ActiveSection />
+          </div>
+        </div>
 
-        <TabsContent value="theory">
-          <TheorySection />
-        </TabsContent>
-
-        <TabsContent value="simulate">
-          <SimulateSection />
-        </TabsContent>
-
-        <TabsContent value="report">
-          <ReportSection />
-        </TabsContent>
-      </Tabs>
-
-      <footer className="pt-8 pb-4 text-center text-xs text-muted-foreground">
-        SID — Optimisation Évolutive Multi-Objectif · Backend FastAPI · Frontend
-        Next.js 14
-      </footer>
-    </main>
+        <footer className="pt-8 pb-4 text-center text-xs text-muted-foreground">
+          SID — Optimisation Évolutive Multi-Objectif · FastAPI + Next.js 14
+        </footer>
+      </main>
+    </div>
   );
 }

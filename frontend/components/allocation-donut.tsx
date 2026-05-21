@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useMemo } from "react";
 import {
   Cell,
@@ -69,8 +68,8 @@ export function AllocationDonut({
     total <= 1 ? 1 : 1.0 - (idx / (total - 1)) * 0.55;
 
   return (
-    <div className="w-full h-70 relative">
-      <ResponsiveContainer width="100%" height="100%">
+    <div className="w-full relative" style={{ height: 280 }}>
+      <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie
             data={data}

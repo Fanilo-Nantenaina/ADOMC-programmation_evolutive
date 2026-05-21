@@ -16,6 +16,8 @@ import {
 import { useAppStore } from "@/lib/store";
 import type { GenerationEvent } from "@/lib/types";
 
+const CHART_HEIGHT = 480;
+
 type Point = { x: number; y: number };
 
 interface CustomShapeProps {
@@ -81,6 +83,8 @@ function ChartTooltip({ active, payload }: ChartTooltipProps) {
 
 export function ParetoStreamChart() {
   const latestByAlgo = useAppStore((s) => s.latestByAlgo);
+  const allEventsByAlgo = useAppStore((s) => s.allEventsByAlgo);
+  const viewGen = useAppStore((s) => s.viewGen);
   const currentGen = useAppStore((s) => s.currentGen);
   const totalGen = useAppStore((s) => s.totalGen);
   const isSimulating = useAppStore((s) => s.isSimulating);
@@ -88,34 +92,50 @@ export function ParetoStreamChart() {
   const assets = useAppStore((s) => s.assets);
   const mode = useAppStore((s) => s.mode);
 
+  const displayedEvents = useMemo(() => {
+    const result: Record<string, GenerationEvent> = {};
+
+    if (viewGen === null) {
+      for (const [algo, evt] of Object.entries(latestByAlgo)) {
+        result[algo] = evt;
+      }
+    } else {
+      for (const [algo, list] of Object.entries(allEventsByAlgo)) {
+        if (list.length > 0) {
+          const idx = Math.min(viewGen - 1, list.length - 1);
+          result[algo] = list[idx];
+        }
+      }
+    }
+    return result;
+  }, [viewGen, latestByAlgo, allEventsByAlgo]);
+
   const { populations, picks } = useMemo(() => {
     const populations: Record<string, Point[]> = {};
     const picks: Record<string, Point[]> = {};
 
-    for (const [algoName, evt] of Object.entries(latestByAlgo)) {
-      const typed: GenerationEvent = evt;
-      populations[algoName] = typed.population.map((i) => ({
+    for (const [algoName, evt] of Object.entries(displayedEvents)) {
+      populations[algoName] = evt.population.map((i) => ({
         x: i.risk_pct,
         y: i.return_pct,
       }));
-      picks[algoName] = [
-        { x: typed.topsis.risk_pct, y: typed.topsis.return_pct },
-      ];
+      picks[algoName] = [{ x: evt.topsis.risk_pct, y: evt.topsis.return_pct }];
     }
     return { populations, picks };
-  }, [latestByAlgo]);
+  }, [displayedEvents]);
 
   const xMax = Math.max(...assets.map((a) => a.volatility_pct), 10) * 1.1;
   const yMax = Math.max(...assets.map((a) => a.expected_return_pct), 5) * 1.1;
 
+  const displayGen = viewGen ?? currentGen;
   const title = isSimulating
     ? mode === "simple"
       ? `L'IA cherche... étape ${currentGen}/${totalGen}`
       : `Convergence des fronts — Génération ${currentGen}/${totalGen}`
     : currentGen > 0
       ? mode === "simple"
-        ? "Résultat final"
-        : "Front de Pareto final"
+        ? `Résultat à l'étape ${displayGen}`
+        : `Front de Pareto — Génération ${displayGen}`
       : mode === "simple"
         ? "Prêt à lancer la recherche"
         : "Espace de recherche bi-objectif";
@@ -129,111 +149,109 @@ export function ParetoStreamChart() {
   return (
     <div className="w-full animate-fade-in">
       <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
-      <div className="h-120">
-        <ResponsiveContainer width="100%" height="100%">
-          <ScatterChart margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
-            <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
+      <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+        <ScatterChart margin={{ top: 20, right: 30, bottom: 60, left: 60 }}>
+          <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" />
 
-            <XAxis
-              type="number"
-              dataKey="x"
-              domain={[0, xMax]}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-              stroke="var(--muted-foreground)"
-              label={{
-                value:
-                  mode === "simple"
-                    ? "Niveau de risque (%)"
-                    : "Volatilité σₚ (%)  — à minimiser",
-                position: "insideBottom",
-                offset: -20,
-                style: { fill: "var(--muted-foreground)", fontSize: 12 },
-              }}
-            />
-            <YAxis
-              type="number"
-              dataKey="y"
-              domain={[0, yMax]}
-              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
-              stroke="var(--muted-foreground)"
-              label={{
-                value:
-                  mode === "simple"
-                    ? "Rendement attendu (%)"
-                    : "Rendement E[Rₚ] (%)  — à maximiser",
-                angle: -90,
-                position: "insideLeft",
-                offset: -40,
-                style: {
-                  fill: "var(--muted-foreground)",
-                  fontSize: 12,
-                  textAnchor: "middle",
-                },
-              }}
-            />
+          <XAxis
+            type="number"
+            dataKey="x"
+            domain={[0, xMax]}
+            tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+            stroke="var(--muted-foreground)"
+            label={{
+              value:
+                mode === "simple"
+                  ? "Niveau de risque (%)"
+                  : "Volatilité σₚ (%) — à minimiser",
+              position: "insideBottom",
+              offset: -20,
+              style: { fill: "var(--muted-foreground)", fontSize: 12 },
+            }}
+          />
+          <YAxis
+            type="number"
+            dataKey="y"
+            domain={[0, yMax]}
+            tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+            stroke="var(--muted-foreground)"
+            label={{
+              value:
+                mode === "simple"
+                  ? "Rendement attendu (%)"
+                  : "Rendement E[Rₚ] (%) — à maximiser",
+              angle: -90,
+              position: "insideLeft",
+              offset: -40,
+              style: {
+                fill: "var(--muted-foreground)",
+                fontSize: 12,
+                textAnchor: "middle",
+              },
+            }}
+          />
 
-            <Tooltip
-              content={<ChartTooltip />}
-              cursor={{
-                stroke: "var(--muted-foreground)",
-                strokeDasharray: "3 3",
-              }}
-            />
-            <Legend
-              wrapperStyle={{ paddingTop: 16 }}
-              iconType="circle"
-              formatter={(value) => (
-                <span className="text-xs text-muted-foreground">{value}</span>
-              )}
-            />
-
-            {Object.entries(populations).map(([algo, pts]) => (
-              <Scatter
-                key={`pop-${algo}`}
-                name={
-                  mode === "simple"
-                    ? `Portefeuilles (${algo})`
-                    : `Front (${algo})`
-                }
-                data={pts}
-                fill={colorOf(algo, "pop")}
-                shape={<CircleShape />}
-                isAnimationActive={false}
-              />
-            ))}
-
-            {Object.entries(picks).map(([algo, pts]) => (
-              <Scatter
-                key={`best-${algo}`}
-                name={
-                  mode === "simple"
-                    ? `Meilleur choix (${algo})`
-                    : `Compromis TOPSIS (${algo})`
-                }
-                data={pts}
-                fill={colorOf(algo, "best")}
-                shape={<StarShape />}
-                isAnimationActive={false}
-              />
-            ))}
-
-            {maxRiskPct !== null && (
-              <ReferenceLine
-                x={maxRiskPct * 100}
-                stroke="var(--destructive)"
-                strokeDasharray="5 5"
-                strokeWidth={2}
-                label={{
-                  value: mode === "simple" ? "Limite sécurité" : "σ_max",
-                  position: "top",
-                  fill: "var(--destructive)",
-                  fontSize: 11,
-                }}
-              />
+          <Tooltip
+            content={<ChartTooltip />}
+            cursor={{
+              stroke: "var(--muted-foreground)",
+              strokeDasharray: "3 3",
+            }}
+          />
+          <Legend
+            wrapperStyle={{ paddingTop: 16 }}
+            iconType="circle"
+            formatter={(value) => (
+              <span className="text-xs text-muted-foreground">{value}</span>
             )}
-          </ScatterChart>
-        </ResponsiveContainer>
-      </div>
+          />
+
+          {Object.entries(populations).map(([algo, pts]) => (
+            <Scatter
+              key={`pop-${algo}`}
+              name={
+                mode === "simple"
+                  ? `Portefeuilles (${algo})`
+                  : `Front (${algo})`
+              }
+              data={pts}
+              fill={colorOf(algo, "pop")}
+              shape={<CircleShape />}
+              isAnimationActive={false}
+            />
+          ))}
+
+          {Object.entries(picks).map(([algo, pts]) => (
+            <Scatter
+              key={`best-${algo}`}
+              name={
+                mode === "simple"
+                  ? `Meilleur choix (${algo})`
+                  : `Compromis TOPSIS (${algo})`
+              }
+              data={pts}
+              fill={colorOf(algo, "best")}
+              shape={<StarShape />}
+              isAnimationActive={false}
+            />
+          ))}
+
+          {maxRiskPct !== null && (
+            <ReferenceLine
+              x={maxRiskPct * 100}
+              stroke="var(--destructive)"
+              strokeDasharray="5 5"
+              strokeWidth={2}
+              label={{
+                value: mode === "simple" ? "Limite sécurité" : "σ_max",
+                position: "top",
+                fill: "var(--destructive)",
+                fontSize: 11,
+              }}
+            />
+          )}
+        </ScatterChart>
+      </ResponsiveContainer>
     </div>
   );
 }

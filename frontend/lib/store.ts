@@ -79,11 +79,15 @@ interface AppState {
 
   currentGen: number;
   totalGen: number;
+  allEventsByAlgo: Record<string, GenerationEvent[]>;
   latestByAlgo: Record<string, GenerationEvent>;
   finalByAlgo: Record<string, GenerationEvent>;
   isSimulating: boolean;
   simulationError: string | null;
   abortController: AbortController | null;
+
+  viewGen: number | null;
+  setViewGen: (g: number | null) => void;
 
   setSimulating: (b: boolean) => void;
   setSimulationError: (s: string | null) => void;
@@ -108,7 +112,7 @@ export const useAppStore = create<AppState>((set) => ({
       assets: state.assets.map((a, i) => (i === idx ? { ...a, ...patch } : a)),
     })),
   setNumAssets: (n) =>
-    set((state) => {
+    set(() => {
       const ALL = [
         ...DEFAULT_ASSETS,
         { name: "BTC", expected_return_pct: 55, volatility_pct: 75 },
@@ -159,31 +163,45 @@ export const useAppStore = create<AppState>((set) => ({
 
   currentGen: 0,
   totalGen: 0,
+  allEventsByAlgo: {},
   latestByAlgo: {},
   finalByAlgo: {},
   isSimulating: false,
   simulationError: null,
   abortController: null,
+  viewGen: null,
 
+  setViewGen: (g) => set({ viewGen: g }),
   setSimulating: (b) => set({ isSimulating: b }),
   setSimulationError: (s) => set({ simulationError: s }),
   setAbortController: (a) => set({ abortController: a }),
+
   pushEvent: (e) =>
-    set((state) => ({
-      currentGen: Math.max(state.currentGen, e.gen),
-      totalGen: e.n_gen,
-      latestByAlgo: { ...state.latestByAlgo, [e.algorithm]: e },
-      finalByAlgo: e.is_final
-        ? { ...state.finalByAlgo, [e.algorithm]: e }
-        : state.finalByAlgo,
-    })),
+    set((state) => {
+      const prevList = state.allEventsByAlgo[e.algorithm] ?? [];
+      return {
+        currentGen: Math.max(state.currentGen, e.gen),
+        totalGen: e.n_gen,
+        allEventsByAlgo: {
+          ...state.allEventsByAlgo,
+          [e.algorithm]: [...prevList, e],
+        },
+        latestByAlgo: { ...state.latestByAlgo, [e.algorithm]: e },
+        finalByAlgo: e.is_final
+          ? { ...state.finalByAlgo, [e.algorithm]: e }
+          : state.finalByAlgo,
+      };
+    }),
+
   resetSimulation: () =>
     set({
       currentGen: 0,
       totalGen: 0,
+      allEventsByAlgo: {},
       latestByAlgo: {},
       finalByAlgo: {},
       isSimulating: false,
       simulationError: null,
+      viewGen: null,
     }),
 }));

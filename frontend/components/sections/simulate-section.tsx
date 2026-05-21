@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 
 import { ParetoStreamChart } from "@/components/pareto-stream-chart";
+import { PlaybackControl } from "@/components/playback-control";
 import { useAppStore } from "@/lib/store";
 import { streamSimulation } from "@/lib/api";
 import type { AlgorithmChoice } from "@/lib/types";
@@ -300,6 +301,7 @@ export function SimulateSection() {
       <Card className="glass">
         <CardContent className="pt-6">
           <ParetoStreamChart />
+          <PlaybackControl />
         </CardContent>
       </Card>
     </div>
