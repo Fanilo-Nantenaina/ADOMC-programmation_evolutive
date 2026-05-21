@@ -1,15 +1,3 @@
-"""
-Onglet 4 — Politique d'allocation apprise par NeuroEvolution.
-
-Différence philosophique vs MOEP/NSGA-II :
-- MOEP optimise UN vecteur de poids pour UN scénario.
-- NEAT évolue UN RÉSEAU qui CALCULE les poids à partir du contexte de marché.
-
-Une fois entraîné sur des scénarios diversifiés, le réseau peut être interrogé
-en temps réel avec n'importe quel état de marché → adaptation instantanée
-sans re-optimisation.
-"""
-
 import os
 import time
 

@@ -1,18 +1,8 @@
-"""
-Rendu de la barre latérale et collecte de tous les paramètres de configuration.
-
-Retourne un dictionnaire unique consommé par les onglets.
-"""
-
 import streamlit as st
 
 
 def render_sidebar() -> dict:
-    """
-    Affiche la sidebar complète et retourne un dict avec toutes les valeurs.
 
-    Le contenu et le langage s'adaptent automatiquement au mode (simple/expert).
-    """
     st.sidebar.markdown(
         '<div style="font-size: 0.7rem; text-transform: uppercase; '
         "letter-spacing: 0.12em; font-weight: 700; opacity: 0.6; "
