@@ -13,6 +13,7 @@ import { SimulateSection } from "@/components/sections/simulate-section";
 import { ReportSection } from "@/components/sections/report-section";
 
 import { useAppStore } from "@/lib/store";
+import type { Step } from "@/lib/types";
 
 export default function HomePage() {
   const mode = useAppStore((s) => s.mode);
@@ -21,20 +22,17 @@ export default function HomePage() {
   const isSimple = mode === "simple";
 
   return (
-    <main className="container max-w-7xl py-6 md:py-10 space-y-8">
-      {}
+    <main className="container max-w-7xl mx-auto px-4 py-6 md:py-10 space-y-8">
       <div className="flex items-center justify-end gap-3">
         <ModeToggle />
         <ThemeToggle />
       </div>
 
-      {}
       <Hero />
 
-      {}
       <Tabs
         value={step}
-        onValueChange={(v) => setStep(v as any)}
+        onValueChange={(v: string) => setStep(v as Step)}
         className="w-full"
       >
         <TabsList className="w-full flex flex-wrap md:w-auto">

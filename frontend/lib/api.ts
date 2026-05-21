@@ -1,4 +1,3 @@
-
 import type {
   GenerationEvent,
   PSDValidationResult,
@@ -29,41 +28,50 @@ export async function validateCorrelation(
 
 type SSEEventKind = "data" | "start" | "end" | "error";
 
-interface SSEEvent {
-  event: SSEEventKind;
-  data: any;
+export interface SSEStartPayload {
+  n_gen: number;
+  algorithms: string[];
 }
 
-function parseSSEEvent(rawBlock: string): SSEEvent | null {
+export interface SSEErrorPayload {
+  message: string;
+}
+
+type SSEParsed =
+  | { event: "data"; data: GenerationEvent }
+  | { event: "start"; data: SSEStartPayload }
+  | { event: "end"; data: Record<string, unknown> }
+  | { event: "error"; data: SSEErrorPayload };
+
+function parseSSEEvent(rawBlock: string): SSEParsed | null {
   const lines = rawBlock.split("\n").filter((l) => l.length > 0);
   let event: SSEEventKind = "data";
-  let data: string | null = null;
+  let rawData: string | null = null;
 
   for (const line of lines) {
     if (line.startsWith("event: ")) {
-      const k = line.slice(7).trim() as SSEEventKind;
+      const k = line.slice(7).trim();
       if (k === "start" || k === "end" || k === "error" || k === "data") {
         event = k;
       }
     } else if (line.startsWith("data: ")) {
-      data = line.slice(6);
+      rawData = line.slice(6);
     }
   }
 
-  if (data === null) return null;
+  if (rawData === null) return null;
 
   try {
-    return { event, data: JSON.parse(data) };
+    const parsed = JSON.parse(rawData) as unknown;
+    return { event, data: parsed } as SSEParsed;
   } catch {
     return null;
   }
 }
 
-export type SimulationCallback = (e: GenerationEvent) => void;
-
 export interface SimulationCallbacks {
-  onEvent: SimulationCallback;
-  onStart?: (meta: { n_gen: number; algorithms: string[] }) => void;
+  onEvent: (e: GenerationEvent) => void;
+  onStart?: (meta: SSEStartPayload) => void;
   onEnd?: () => void;
   onError?: (msg: string) => void;
 }
@@ -112,17 +120,35 @@ export async function streamSimulation(
           cb.onError?.(parsed.data.message ?? "unknown error");
           break;
         case "data":
-          cb.onEvent(parsed.data as GenerationEvent);
+          cb.onEvent(parsed.data);
           break;
       }
     }
   }
 }
 
+export interface AlgorithmExportPayload {
+  weights: number[][];
+  returns_pct: number[];
+  risks_pct: number[];
+  topsis: {
+    best_idx: number;
+    return_pct: number;
+    risk_pct: number;
+    sharpe: number;
+    weights: number[];
+  };
+}
+
+export interface IndicatorsExportPayload {
+  hv: number;
+  igd: number;
+}
+
 export async function exportReport(
   config: SimulationRequest,
-  results: Record<string, any>,
-  indicators?: Record<string, any>,
+  results: Record<string, AlgorithmExportPayload>,
+  indicators?: Record<string, IndicatorsExportPayload>,
 ): Promise<Blob> {
   const res = await fetch(`${BASE_URL}/api/export-report`, {
     method: "POST",

@@ -15,7 +15,7 @@ export function Hero() {
         {isSimple ? "Mode Découverte" : "Mode Expert"}
       </div>
 
-      <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-foreground to-primary">
+      <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-br from-foreground to-primary">
         {isSimple
           ? "Votre Conseiller Financier Intelligent"
           : "SID — Optimisation Évolutive Multi-Objectif"}

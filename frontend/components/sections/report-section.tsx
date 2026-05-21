@@ -16,6 +16,7 @@ import { AllocationDonut } from "@/components/allocation-donut";
 import { MetricCard } from "@/components/metric-card";
 import { useAppStore } from "@/lib/store";
 import { exportReport, downloadBlob } from "@/lib/api";
+import type { AlgorithmExportPayload } from "@/lib/api";
 
 export function ReportSection() {
   const mode = useAppStore((s) => s.mode);
@@ -51,13 +52,19 @@ export function ReportSection() {
 
   async function handleExport() {
     try {
-      const results: Record<string, any> = {};
+      const results: Record<string, AlgorithmExportPayload> = {};
       for (const [algoName, evt] of Object.entries(finalByAlgo)) {
         results[algoName] = {
           weights: [evt.topsis.weights],
           returns_pct: [evt.topsis.return_pct],
           risks_pct: [evt.topsis.risk_pct],
-          topsis: evt.topsis,
+          topsis: {
+            best_idx: evt.topsis.best_idx,
+            return_pct: evt.topsis.return_pct,
+            risk_pct: evt.topsis.risk_pct,
+            sharpe: evt.topsis.sharpe,
+            weights: evt.topsis.weights,
+          },
         };
       }
 
@@ -81,8 +88,9 @@ export function ReportSection() {
         .replace(/[:-]/g, "")}.xlsx`;
       downloadBlob(blob, filename);
       toast.success("Rapport Excel téléchargé");
-    } catch (e: any) {
-      toast.error(`Export échoué : ${e?.message ?? e}`);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e);
+      toast.error(`Export échoué : ${msg}`);
     }
   }
 
@@ -183,7 +191,9 @@ export function ReportSection() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-sm font-semibold mb-3">Vue d'ensemble</h4>
+                  <h4 className="text-sm font-semibold mb-3">
+                    Vue d&apos;ensemble
+                  </h4>
                   <AllocationDonut
                     weights={evt.topsis.weights}
                     assetNames={assets.map((a) => a.name)}

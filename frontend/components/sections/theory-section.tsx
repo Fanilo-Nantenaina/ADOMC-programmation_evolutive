@@ -35,8 +35,8 @@ function SimpleTheory() {
               gagner plus sans accepter plus de risque.
             </p>
             <div className="rounded-lg border-l-2 border-primary bg-primary/5 p-3 text-foreground">
-              C'est cette courbe que notre IA recherche : les choix où plus rien
-              ne se sacrifie inutilement.
+              C&apos;est cette courbe que notre IA recherche : les choix où plus
+              rien ne se sacrifie inutilement.
             </div>
           </CardContent>
         </Card>
@@ -45,7 +45,7 @@ function SimpleTheory() {
           <CardHeader>
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              <CardTitle className="text-lg">L'arbitre neutre</CardTitle>
+              <CardTitle className="text-lg">L&apos;arbitre neutre</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="text-sm leading-relaxed text-muted-foreground space-y-3">
@@ -55,12 +55,12 @@ function SimpleTheory() {
             </p>
             <p>
               Un système compare chaque point à deux références : le{" "}
-              <strong>paradis financier</strong> (max gain, zéro risque) et l'
-              <strong>enfer financier</strong> (zéro gain, max risque).
+              <strong>paradis financier</strong> (max gain, zéro risque) et
+              l&apos;<strong>enfer financier</strong> (zéro gain, max risque).
             </p>
             <div className="rounded-lg border-l-2 border-primary bg-primary/5 p-3 text-foreground">
               Le meilleur est celui qui est le plus proche du paradis et le plus
-              loin de l'enfer, selon vos préférences.
+              loin de l&apos;enfer, selon vos préférences.
             </div>
           </CardContent>
         </Card>
@@ -70,12 +70,14 @@ function SimpleTheory() {
         <CardHeader>
           <div className="flex items-center gap-2">
             <GitBranch className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">L'intelligence évolutive</CardTitle>
+            <CardTitle className="text-lg">
+              L&apos;intelligence évolutive
+            </CardTitle>
           </div>
         </CardHeader>
         <CardContent className="text-sm leading-relaxed text-muted-foreground space-y-2">
           <p>
-            L'IA fonctionne comme la sélection naturelle : elle crée une
+            L&apos;IA fonctionne comme la sélection naturelle : elle crée une
             population de portefeuilles, garde les meilleurs, les fait muter
             légèrement, et recommence. Au fil des générations, la population se
             rapproche automatiquement de la courbe parfaite.
@@ -106,7 +108,7 @@ s.c.  Σ w_i = 1,  w_i ≥ 0`}
           <ul className="text-xs space-y-1 text-muted-foreground">
             <li>• μ ∈ ℝⁿ : vecteur des rendements espérés</li>
             <li>• Σ ∈ ℝⁿˣⁿ : matrice de covariance (PSD)</li>
-            <li>• w ∈ Δⁿ⁻¹ : vecteur d'allocation simplexe</li>
+            <li>• w ∈ Δⁿ⁻¹ : vecteur d&apos;allocation simplexe</li>
             <li>• Contrainte optionnelle : σ_p ≤ σ_max</li>
           </ul>
         </CardContent>
@@ -151,8 +153,9 @@ s.c.  Σ w_i = 1,  w_i ≥ 0`}
 d_i^± = √(Σ_j w_j · (n_ij - n_j^±)²)`}
             </pre>
             <p>
-              Sélectionne la solution maximisant la proximité relative à l'idéal
-              positif après normalisation min-max (Hwang & Yoon, 1981).
+              Sélectionne la solution maximisant la proximité relative à
+              l&apos;idéal positif après normalisation min-max (Hwang & Yoon,
+              1981).
             </p>
             <p>
               Variante : pondération embarquée dans la distance L2 plutôt que
@@ -179,8 +182,8 @@ d_i^± = √(Σ_j w_j · (n_ij - n_j^±)²)`}
             <p className="font-semibold text-foreground">IGD</p>
             <p>
               Distance moyenne au front de référence approché (union
-              non-dominée). Relatif : l'algo qui contribue le plus à l'union
-              aura un IGD biaisé à la baisse. Plus petit = mieux.
+              non-dominée). Relatif : l&apos;algo qui contribue le plus à
+              l&apos;union aura un IGD biaisé à la baisse. Plus petit = mieux.
             </p>
           </div>
         </CardContent>

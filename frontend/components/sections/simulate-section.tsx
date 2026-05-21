@@ -27,6 +27,7 @@ import { Progress } from "@/components/ui/progress";
 import { ParetoStreamChart } from "@/components/pareto-stream-chart";
 import { useAppStore } from "@/lib/store";
 import { streamSimulation } from "@/lib/api";
+import type { AlgorithmChoice } from "@/lib/types";
 
 export function SimulateSection() {
   const mode = useAppStore((s) => s.mode);
@@ -104,12 +105,18 @@ export function SimulateSection() {
         },
         ctrl.signal,
       );
-    } catch (e: any) {
-      if (e?.name !== "AbortError") {
-        setSimulationError(e?.message ?? String(e));
+    } catch (e: unknown) {
+      if (e instanceof Error && e.name !== "AbortError") {
+        setSimulationError(e.message);
         setSimulating(false);
         setAbortController(null);
-        toast.error(`Erreur : ${e?.message ?? e}`);
+        toast.error(`Erreur : ${e.message}`);
+      } else if (!(e instanceof Error)) {
+        const msg = String(e);
+        setSimulationError(msg);
+        setSimulating(false);
+        setAbortController(null);
+        toast.error(`Erreur : ${msg}`);
       }
     }
   }
@@ -135,7 +142,7 @@ export function SimulateSection() {
           <CardDescription>
             {isSimple
               ? "Réglez les paramètres et cliquez sur Lancer. L'IA évoluera génération par génération sous vos yeux."
-              : "Streaming SSE génération-par-génération. Le front s'actualise à 60 FPS via Plotly.react()."}
+              : "Streaming SSE génération-par-génération. Le front s'actualise en flux continu."}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid md:grid-cols-2 gap-6">
@@ -146,7 +153,9 @@ export function SimulateSection() {
               </Label>
               <Select
                 value={algorithm}
-                onValueChange={(v: any) => setAlgorithm(v)}
+                onValueChange={(v: string) =>
+                  setAlgorithm(v as AlgorithmChoice)
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -194,7 +203,7 @@ export function SimulateSection() {
                 type="number"
                 className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
                 value={seed}
-                onChange={(e) => setSeed(parseInt(e.target.value || "0"))}
+                onChange={(e) => setSeed(parseInt(e.target.value || "0", 10))}
                 min={0}
                 max={99999}
               />
@@ -297,6 +306,16 @@ export function SimulateSection() {
   );
 }
 
+interface SliderFieldProps {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  suffix?: string;
+}
+
 function SliderField({
   label,
   value,
@@ -305,15 +324,7 @@ function SliderField({
   max,
   step,
   suffix,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  min: number;
-  max: number;
-  step: number;
-  suffix?: string;
-}) {
+}: SliderFieldProps) {
   return (
     <div className="space-y-1.5">
       <div className="flex justify-between text-sm">

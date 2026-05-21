@@ -1,10 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { useMemo } from "react";
-import { useTheme } from "next-themes";
 
-const Plot = dynamic(() => import("react-plotly.js"), { ssr: false });
+import { useMemo } from "react";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 interface AllocationDonutProps {
   weights: number[];
@@ -12,12 +17,34 @@ interface AllocationDonutProps {
   algorithm: string;
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return `rgba(${r},${g},${b},${alpha})`;
+interface DonutDatum {
+  name: string;
+  value: number;
+}
+
+interface TooltipPayload {
+  payload: DonutDatum;
+  color?: string;
+}
+
+interface DonutTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayload[];
+}
+
+function DonutTooltip({ active, payload }: DonutTooltipProps) {
+  if (!active || !payload || payload.length === 0) return null;
+  const p = payload[0];
+  return (
+    <div className="glass rounded-lg px-3 py-2 text-xs shadow-lg">
+      <div className="font-semibold" style={{ color: p.color }}>
+        {p.payload.name}
+      </div>
+      <div className="font-mono text-muted-foreground">
+        {p.payload.value.toFixed(2)} %
+      </div>
+    </div>
+  );
 }
 
 export function AllocationDonut({
@@ -25,91 +52,69 @@ export function AllocationDonut({
   assetNames,
   algorithm,
 }: AllocationDonutProps) {
-  const { resolvedTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
-
-  const baseColor = useMemo(() => {
-    if (algorithm.includes("MOEP")) return isDark ? "#22D3EE" : "#0EA5E9";
-    if (algorithm.includes("NSGA")) return isDark ? "#34D399" : "#F97316";
-    return isDark ? "#818CF8" : "#0F766E";
-  }, [algorithm, isDark]);
-
-  const filtered = useMemo(() => {
+  const data: DonutDatum[] = useMemo(() => {
     return assetNames
-      .map((name, i) => ({ name, pct: (weights[i] || 0) * 100 }))
-      .filter((r) => r.pct > 0.1)
-      .sort((a, b) => b.pct - a.pct);
+      .map((name, i) => ({ name, value: (weights[i] ?? 0) * 100 }))
+      .filter((row) => row.value > 0.1)
+      .sort((a, b) => b.value - a.value);
   }, [assetNames, weights]);
 
-  const data = useMemo(() => {
-    const n = filtered.length;
-    const colors = filtered.map((_, i) => {
-      const alpha = n > 1 ? 1.0 - (i / (n - 1)) * 0.55 : 1.0;
-      return hexToRgba(baseColor, alpha);
-    });
+  const baseColor = useMemo(() => {
+    if (algorithm.includes("MOEP")) return "var(--moep)";
+    if (algorithm.includes("NSGA")) return "var(--nsga)";
+    return "var(--primary)";
+  }, [algorithm]);
 
-    return [
-      {
-        labels: filtered.map((r) => r.name),
-        values: filtered.map((r) => r.pct),
-        type: "pie" as const,
-        hole: 0.6,
-        marker: {
-          colors,
-          line: { color: isDark ? "#0B0F19" : "#FFFFFF", width: 2 },
-        },
-        textfont: {
-          color: isDark ? "#F3F4F6" : "#1F2937",
-          family: "Inter, system-ui, sans-serif",
-          size: 11,
-        },
-        sort: false,
-        hovertemplate: "<b>%{label}</b><br>%{value:.2f}%<extra></extra>",
-      },
-    ];
-  }, [filtered, baseColor, isDark]);
-
-  const layout = {
-    plot_bgcolor: "rgba(0,0,0,0)",
-    paper_bgcolor: "rgba(0,0,0,0)",
-    margin: { l: 10, r: 10, t: 10, b: 10 },
-    showlegend: true,
-    legend: {
-      orientation: "v" as const,
-      x: 1.0,
-      xanchor: "right" as const,
-      y: 0.5,
-      yanchor: "middle" as const,
-      font: {
-        color: isDark ? "#9CA3AF" : "#6B7280",
-        size: 11,
-      },
-      bgcolor: "rgba(0,0,0,0)",
-    },
-    annotations: [
-      {
-        text: `<b>${algorithm}</b>`,
-        x: 0.5,
-        y: 0.5,
-        font: {
-          color: isDark ? "#F3F4F6" : "#1F2937",
-          size: 13,
-          family: "Inter",
-        },
-        showarrow: false,
-      },
-    ],
-  };
+  const opacityScale = (idx: number, total: number) =>
+    total <= 1 ? 1 : 1.0 - (idx / (total - 1)) * 0.55;
 
   return (
-    <div className="w-full h-[280px]">
-      <Plot
-        data={data as any}
-        layout={layout as any}
-        config={{ responsive: true, displayModeBar: false }}
-        style={{ width: "100%", height: "100%" }}
-        useResizeHandler
-      />
+    <div className="w-full h-70 relative">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="40%"
+            cy="50%"
+            innerRadius={55}
+            outerRadius={95}
+            paddingAngle={2}
+            dataKey="value"
+            nameKey="name"
+            isAnimationActive
+            animationDuration={500}
+            stroke="var(--background)"
+            strokeWidth={2}
+          >
+            {data.map((_, idx) => (
+              <Cell
+                key={idx}
+                fill={baseColor}
+                fillOpacity={opacityScale(idx, data.length)}
+              />
+            ))}
+          </Pie>
+          <Tooltip content={<DonutTooltip />} />
+          <Legend
+            verticalAlign="middle"
+            align="right"
+            layout="vertical"
+            iconType="circle"
+            iconSize={8}
+            wrapperStyle={{ fontSize: 11, paddingLeft: 16 }}
+            formatter={(value) => (
+              <span className="text-xs text-muted-foreground">{value}</span>
+            )}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+
+      {}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="text-center ml-[-10%]">
+          <div className="text-xs font-bold text-foreground">{algorithm}</div>
+        </div>
+      </div>
     </div>
   );
 }
