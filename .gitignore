@@ -3,3 +3,4 @@
 *clean*.py
 __pycache__
 *.pkl
+frontend/.next
