@@ -1,11 +1,11 @@
 "use client";
 
-
 import {
   Settings2,
   BookOpen,
   Activity,
   FileText,
+  Brain,
   Check,
   type LucideIcon,
 } from "lucide-react";
@@ -45,6 +45,13 @@ const STEPS: StepDef[] = [
     icon: Activity,
   },
   {
+    id: "policy",
+    labelExpert: "Politique apprise (NEAT)",
+    labelSimple: "Conseiller IA",
+    description: "Politique généralisable",
+    icon: Brain,
+  },
+  {
     id: "report",
     labelExpert: "Rapport",
     labelSimple: "Recommandation",
@@ -53,7 +60,7 @@ const STEPS: StepDef[] = [
   },
 ];
 
-const STEP_ORDER: Step[] = ["config", "theory", "simulate", "report"];
+const STEP_ORDER: Step[] = ["config", "theory", "simulate", "policy", "report"];
 
 export function SidebarNav() {
   const step = useAppStore((s) => s.step);

@@ -17,6 +17,7 @@ export interface SimulationRequest {
   max_risk_pct: number | null;
   w_return: number;
   risk_free_rate: number;
+  frame_delay_ms: number;
 }
 
 export interface IndividualSnapshot {
@@ -52,4 +53,46 @@ export interface PSDValidationResult {
 
 export type Mode = "simple" | "expert";
 
-export type Step = "config" | "theory" | "simulate" | "report";
+export type Step = "config" | "theory" | "simulate" | "report" | "policy";
+
+export interface NeatTrainRequest {
+  assets: AssetConfig[];
+  correlation_matrix: number[][];
+  n_generations: number;
+  n_scenarios: number;
+  perturb_strength: number;
+  w_return: number;
+  risk_free_rate: number;
+  seed: number;
+  frame_delay_ms: number;
+}
+
+export interface NeatTrainEvent {
+  gen: number;
+  n_gen: number;
+  f_max: number;
+  f_mean: number;
+  n_species: number;
+  is_final: boolean;
+}
+
+export interface NeatStartPayload {
+  n_gen: number;
+  n_scenarios: number;
+  n_inputs: number;
+  n_outputs: number;
+}
+
+export interface NeatInferResponse {
+  weights: number[];
+  asset_names: string[];
+  expected_return_pct: number;
+  risk_pct: number;
+  sharpe: number;
+}
+
+export interface NeatStatus {
+  has_policy: boolean;
+  asset_names: string[] | null;
+  history: { max: number[]; mean: number[]; species: number[] } | null;
+}

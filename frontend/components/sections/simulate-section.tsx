@@ -48,6 +48,8 @@ export function SimulateSection() {
   const setMaxRiskPct = useAppStore((s) => s.setMaxRiskPct);
   const riskFreeRate = useAppStore((s) => s.riskFreeRate);
   const setRiskFreeRate = useAppStore((s) => s.setRiskFreeRate);
+  const frameDelayMs = useAppStore((s) => s.frameDelayMs);
+  const setFrameDelayMs = useAppStore((s) => s.setFrameDelayMs);
 
   const assets = useAppStore((s) => s.assets);
   const correlation = useAppStore((s) => s.correlation);
@@ -84,6 +86,7 @@ export function SimulateSection() {
           max_risk_pct: riskLimitEnabled ? maxRiskPct : null,
           w_return: wReturn,
           risk_free_rate: riskFreeRate,
+          frame_delay_ms: frameDelayMs,
         },
         {
           onStart: (meta) => {
@@ -233,6 +236,20 @@ export function SimulateSection() {
                 suffix=" %"
               />
             )}
+
+            <SliderField
+              label={
+                isSimple
+                  ? "Vitesse d'animation"
+                  : "Délai entre générations (ms)"
+              }
+              value={frameDelayMs}
+              onChange={setFrameDelayMs}
+              min={0}
+              max={500}
+              step={25}
+              suffix=" ms"
+            />
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">

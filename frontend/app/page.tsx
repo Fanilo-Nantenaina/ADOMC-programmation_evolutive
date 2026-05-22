@@ -8,6 +8,7 @@ import { SidebarNav, StepperMobile } from "@/components/sidebar-nav";
 import { ConfigSection } from "@/components/sections/config-section";
 import { TheorySection } from "@/components/sections/theory-section";
 import { SimulateSection } from "@/components/sections/simulate-section";
+import { PolicySection } from "@/components/sections/policy-section";
 import { ReportSection } from "@/components/sections/report-section";
 
 import { useAppStore } from "@/lib/store";
@@ -18,6 +19,7 @@ const SECTIONS: Record<Step, () => JSX.Element> = {
   config: ConfigSection,
   theory: TheorySection,
   simulate: SimulateSection,
+  policy: PolicySection,
   report: ReportSection,
 };
 
@@ -28,7 +30,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       <main className="mx-auto max-w-7xl px-4 py-6 md:py-10 space-y-6">
-        {}
         <div className="flex items-center justify-between gap-3">
           <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground">
             SID · ADOMC
@@ -40,11 +41,8 @@ export default function HomePage() {
         </div>
 
         <Hero />
-
-        {}
         <StepperMobile />
 
-        {}
         <div className="flex gap-6">
           <SidebarNav />
           <div className="flex-1 min-w-0">
@@ -53,7 +51,8 @@ export default function HomePage() {
         </div>
 
         <footer className="pt-8 pb-4 text-center text-xs text-muted-foreground">
-          SID — Optimisation Évolutive Multi-Objectif · FastAPI + Next.js 14
+          SID — Optimisation Évolutive Multi-Objectif · MOEP + NSGA-II + TOPSIS
+          + NEAT
         </footer>
       </main>
     </div>

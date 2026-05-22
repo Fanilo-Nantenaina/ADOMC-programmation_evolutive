@@ -171,3 +171,106 @@ export function downloadBlob(blob: Blob, filename: string): void {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+import type {
+  NeatTrainRequest,
+  NeatTrainEvent,
+  NeatStartPayload,
+  NeatInferResponse,
+  NeatStatus,
+  AssetConfig,
+} from "./types";
+
+export interface NeatTrainCallbacks {
+  onStart?: (meta: NeatStartPayload) => void;
+  onEvent: (e: NeatTrainEvent) => void;
+  onEnd?: (payload: { final_fitness: number | null }) => void;
+  onError?: (msg: string) => void;
+}
+
+export async function streamNeatTraining(
+  req: NeatTrainRequest,
+  cb: NeatTrainCallbacks,
+  externalSignal?: AbortSignal,
+): Promise<void> {
+  const res = await fetch(`${BASE_URL}/api/neat/train`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(req),
+    signal: externalSignal,
+  });
+
+  if (!res.ok || !res.body) {
+    throw new Error(`Training failed to start: HTTP ${res.status}`);
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split("\n\n");
+    buffer = blocks.pop() ?? "";
+
+    for (const block of blocks) {
+      if (block.trim().length === 0) continue;
+      const lines = block.split("\n").filter((l) => l.length > 0);
+      let event = "data";
+      let rawData: string | null = null;
+      for (const line of lines) {
+        if (line.startsWith("event: ")) event = line.slice(7).trim();
+        else if (line.startsWith("data: ")) rawData = line.slice(6);
+      }
+      if (rawData === null) continue;
+      try {
+        const parsed = JSON.parse(rawData) as unknown;
+        switch (event) {
+          case "start":
+            cb.onStart?.(parsed as NeatStartPayload);
+            break;
+          case "end":
+            cb.onEnd?.(parsed as { final_fitness: number | null });
+            break;
+          case "error":
+            cb.onError?.((parsed as { message: string }).message);
+            break;
+          default:
+            cb.onEvent(parsed as NeatTrainEvent);
+        }
+      } catch {}
+    }
+  }
+}
+
+export async function runNeatInference(
+  assets: AssetConfig[],
+  correlationMatrix: number[][],
+  wReturn: number,
+  riskFreeRate: number,
+): Promise<NeatInferResponse> {
+  const res = await fetch(`${BASE_URL}/api/neat/infer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      assets,
+      correlation_matrix: correlationMatrix,
+      w_return: wReturn,
+      risk_free_rate: riskFreeRate,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Inférence échouée : ${text || res.status}`);
+  }
+  return res.json();
+}
+
+export async function fetchNeatStatus(): Promise<NeatStatus> {
+  const res = await fetch(`${BASE_URL}/api/neat/status`);
+  if (!res.ok) throw new Error(`Status check failed: ${res.status}`);
+  return res.json();
+}

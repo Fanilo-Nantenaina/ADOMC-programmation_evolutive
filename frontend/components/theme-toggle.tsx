@@ -8,24 +8,17 @@ import { Button } from "@/components/ui/button";
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme();
 
-  if (resolvedTheme === undefined) {
-    return (
-      <Button variant="ghost" size="icon" aria-label="Chargement du thème">
-        <Sun className="h-4 w-4 opacity-50" />
-      </Button>
-    );
-  }
-
-  const isDark = resolvedTheme === "dark";
-
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      aria-label={isDark ? "Activer le thème clair" : "Activer le thème sombre"}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      aria-label="Basculer entre thème clair et sombre"
+      className="relative"
     >
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      <Sun className="h-4 w-4 rotate-0 scale-100 transition-transform duration-300 dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-transform duration-300 dark:rotate-0 dark:scale-100" />
+      <span className="sr-only">Basculer le thème</span>
     </Button>
   );
 }
