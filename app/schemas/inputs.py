@@ -31,6 +31,7 @@ class SimulationRequest(BaseModel):
     max_risk_pct: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     w_return: float = Field(default=60.0, ge=0.0, le=100.0)
     risk_free_rate: float = Field(default=0.02, ge=0.0, le=0.5)
+    frame_delay_ms: int = Field(default=100, ge=0, le=2000)
 
 
 class AlgorithmResults(BaseModel):

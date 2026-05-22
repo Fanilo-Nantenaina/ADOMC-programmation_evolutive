@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.correlation import router as correlation_router
+from app.api.neat import router as neat_router
 from app.api.report import router as report_router
 from app.api.simulate import router as simulate_router
 
@@ -39,6 +40,7 @@ app.add_middleware(
 app.include_router(correlation_router, prefix="/api", tags=["correlation"])
 app.include_router(simulate_router, prefix="/api", tags=["simulate"])
 app.include_router(report_router, prefix="/api", tags=["report"])
+app.include_router(neat_router, prefix="/api", tags=["neat"])
 
 
 @app.get("/health", tags=["meta"])

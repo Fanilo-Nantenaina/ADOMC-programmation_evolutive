@@ -128,7 +128,10 @@ async def _simulation_event_stream(req: SimulationRequest) -> AsyncGenerator[str
                 event = _build_event(name, gen, req.n_gen, algo, req)
                 yield f"data: {json.dumps(event)}\n\n"
 
-            await asyncio.sleep(0)
+            if req.frame_delay_ms > 0:
+                await asyncio.sleep(req.frame_delay_ms / 1000.0)
+            else:
+                await asyncio.sleep(0)
 
         yield f"event: end\ndata: {json.dumps({'status': 'ok'})}\n\n"
 
