@@ -1,19 +1,17 @@
-from typing import List, Literal, Optional
+"""Pydantic request models."""
 
-from pydantic import BaseModel, Field
+from typing import Any, Dict, List, Literal, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AssetConfig(BaseModel):
-    """A single asset with its expected return and volatility (in %)."""
-
-    name: str = Field(..., min_length=1, max_length=64)
+    name: str = Field(..., min_length=1, max_length=80)
     expected_return_pct: float = Field(..., ge=-50.0, le=200.0)
-    volatility_pct: float = Field(..., gt=0.0, le=200.0)
+    volatility_pct: float = Field(..., ge=0.01, le=200.0)
 
 
 class CorrelationValidationRequest(BaseModel):
-    """Validate a correlation matrix and detect PSD violations."""
-
     asset_names: List[str]
     volatilities: List[float]
     correlation_matrix: List[List[float]]
@@ -31,21 +29,43 @@ class SimulationRequest(BaseModel):
     max_risk_pct: Optional[float] = Field(default=None, ge=0.0, le=1.0)
     w_return: float = Field(default=60.0, ge=0.0, le=100.0)
     risk_free_rate: float = Field(default=0.02, ge=0.0, le=0.5)
+
     frame_delay_ms: int = Field(default=100, ge=0, le=2000)
 
+    cardinality_max: Optional[int] = Field(default=None, ge=1, le=20)
 
-class AlgorithmResults(BaseModel):
-    """Final results for one algorithm (used in export)."""
+    criteria_weights: Optional[List[float]] = Field(
+        default=None, min_length=5, max_length=5
+    )
 
-    weights: List[List[float]]
-    returns_pct: List[float]
-    risks_pct: List[float]
-    topsis: dict
+    early_stop_enabled: bool = Field(default=False)
+    stagnation_window: int = Field(default=10, ge=3, le=50)
+    stagnation_eps: float = Field(default=1e-3, ge=1e-6, le=1.0)
+
+
+class ExactFrontRequest(BaseModel):
+    assets: List[AssetConfig] = Field(..., min_length=2, max_length=20)
+    correlation_matrix: List[List[float]]
+    n_points: int = Field(default=30, ge=5, le=100)
+
+
+class ReportConfig(BaseModel):
+    assets: List[AssetConfig]
+    correlation_matrix: List[List[float]]
+    algorithm: str
+    pop_size: int
+    n_gen: int
+    seed: int
+    max_risk_pct: Optional[float] = None
+    w_return: float
+    risk_free_rate: float
+    frame_delay_ms: int = 100
+    cardinality_max: Optional[int] = None
+    criteria_weights: Optional[List[float]] = None
 
 
 class ReportExportRequest(BaseModel):
-    """Export the simulation results to Excel."""
-
-    config: SimulationRequest
-    results: dict
-    indicators: Optional[dict] = None
+    model_config = ConfigDict(extra="allow")
+    config: ReportConfig
+    results: Dict[str, Any]
+    indicators: Optional[Dict[str, Dict[str, Any]]] = None
